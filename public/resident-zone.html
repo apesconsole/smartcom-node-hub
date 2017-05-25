@@ -54,15 +54,15 @@
 		<div id="page-wrapper">
 			<div class="row">
 				<div class="col-lg-12">
-					<h1 class="page-header fonty">Available Zones</h1>
+					<h1 class="page-header fonty">Available Rooms</h1>
 				</div>
 				
 			</div>
 			<div class="row">
 				<div id="navbar" class="navbar-collapse collapse">
 					<ul class="nav navbar-nav">
-						<li ng-repeat="zone in zonelist | orderBy : 'zoneId'"  id="{{zone.zoneId}}">
-							<a href="#" class="calm-color text-big" ng-click="loadZoneUtility(zone.zoneId)">{{zone.title}}</a>
+						<li ng-repeat="room in roomlist | orderBy : 'roomId'"  id="{{room.roomId}}">
+							<a href="#" class="calm-color text-big" ng-click="loadRoomUtility(room.roomId)">{{room.title}}</a>
 						</li>
 					</ul>
 				</div>	
@@ -71,30 +71,21 @@
 				  <table class="table fonty">
 					<thead>
 					  <tr>
-						<th>Utility</th>
-						<th>Description</th>
-						<th>Status</th>
+						<th>Device</th>
 						<th>Operation</th>
 					  </tr>
 					</thead>
 					<tbody>
-					  <tr ng-repeat="utility in utilitylist | orderBy : 'type'" ng-if="utility.active">
+					  <tr ng-repeat="device in devicelist | orderBy : 'type'" ng-if="device.active">
 						<td>
-							<span class="">{{utility.title}}</span>
-						</td>
-						<td>
-							<span class="">{{utility.description}}</span>
-						</td>
-						<td>
-							<span class="" ng-if="utility.status" >Running</span>
-							<span class="" ng-if="!utility.status" >Switched Off </span>
+							<span class="">{{device.title}}</span>
 						</td>
 						<td>			
 							<label class="toggle">
-								<button class="btn btn-sm btn-success" type="button"  ng-if="utility.status">
+								<button class="btn btn-sm btn-success" type="button"  ng-if="device.status">
 									Turn Off
 								</button>
-								<button class="btn btn-sm btn-d" type="button" ng-if="!utility.status">
+								<button class="btn btn-sm btn-d" type="button" ng-if="!device.status">
 									Turn On
 								</button>
 							 </label>				 
@@ -125,7 +116,7 @@
 	zone.directive('leftmenu', function($compile) {
 		var directive = {};
 		directive.restrict = 'E';
-		directive.templateUrl = "/resources/templates/utility-left-menu.html";		
+		directive.templateUrl = "/resources/templates/resident-left-menu.html";		
 		directive.controller = function($scope, $rootScope, $http) {
 			$scope.zonetab = 'active';			
 		};		
@@ -136,158 +127,133 @@
 		.then(function(response) {
 			$scope.name = response.data.name;
 		});
-		$scope.zonelist = [
+		$scope.roomlist = [
 			{
-				zoneId: 1,
-				title: 'Zone 1'
+				roomId: 1,
+				title: 'Hall'
 			},{
-				zoneId: 2,
-				title: 'Zone 2'
+				roomId: 2,
+				title: 'Master Bed'
 			},{
-				zoneId: 3,
-				title: 'Zone 3'
+				roomId: 3,
+				title: 'Kitchen'
 			},{
-				zoneId: 4,
-				title: 'Common Utility'
+				roomId: 4,
+				title: 'Chidren\'s Room'
 			}
 		];
-		var selectTab = function(zoneId, zonelist){
-			for(var i = 1; i <= zonelist.length; i++){
+		var selectTab = function(roomId){
+			for(var i = 1; i <= $scope.roomlist.length; i++){
 				$('#' + i).attr('style', '');
 			}
-			$('#'+zoneId).attr('style', 'background-color: #eee; color: #235273c');
+			$('#'+roomId).attr('style', 'background-color: #eee; color: #235273c');
 		}
-		$scope.loadZoneUtility = function(zoneId){
-			selectTab(zoneId, $scope.zonelist);
-			switch(zoneId){
-				case 1: 
-				case 2: 
-				case 3: $scope.utilitylist = [
+		
+		$scope.loadRoomUtility = function(roomId){
+			selectTab(roomId);
+			switch(roomId){
+				case 1: $scope.devicelist = [
 					{
 						id: 1,
 						active: true,
 						status: true,
-						title: 'Lift 1',
-						description: 'Otis System'
+						title: 'Light 1'
 					},{
 						id: 2,
 						active: true,
 						status: true,
-						title: 'Lift 2',
-						description: 'Otis System'
+						title: 'Light 2'
 					},{
 						id: 3,
 						active: true,
-						status: true,
-						title: 'Lighting',
-						description: 'Stairway - Floor 0'
+						status: false,
+						title: 'AC'
 					},{
 						id: 4,
 						active: true,
-						status: true,
-						title: 'Lighting',
-						description: 'Stairway - Floor 1'
+						status: false,
+						title: 'TV'
 					},{
 						id: 5,
 						active: true,
-						status: true,
-						title: 'Lighting',
-						description: 'Stairway - Floor 2'
+						status: false,
+						title: 'Music System'
 					},{
 						id: 6,
 						active: true,
-						status: true,
-						title: 'Lighting',
-						description: 'Stairway - Floor 3'
-					},{
-						id: 7,
-						active: true,
-						status: true,
-						title: 'Lighting',
-						description: 'Stairway - Floor 4'
-					},{
-						id: 8,
-						active: true,
-						status: true,
-						title: 'Lighting',
-						description: 'Stairway - Floor 5'
-					},{
-						id: 9,
-						active: true,
-						status: true,
-						title: 'Lighting',
-						description: 'Stairway - Floor 6'
+						status: false,
+						title: 'Fan'
 					}
 				]; break;
-				case 4: $scope.utilitylist = [
+				case 2: $scope.devicelist = [
 					{
-						id: 11,
-						active: true,
-						status: false,
-						title: 'Street Lights',
-						description: 'Common Utility'
-					},{
 						id: 21,
 						active: true,
 						status: true,
-						title: 'Garden Sprinkler',
-						description: 'Inferstrat'
+						title: 'Light 1'
 					},{
-						id: 13,
-						active: true,
-						status: true,
-						title: 'Air Condition',
-						description: 'Common Area 1'
-					},{
-						id: 14,
-						active: true,
-						status: true,
-						title: 'Air Condition',
-						description: 'Common Area 2'
-					},{
-						id: 15,
+						id: 22,
 						active: true,
 						status: false,
-						title: 'Air Condition',
-						description: 'Common Area 3'
+						title: 'Reading Lamp'
 					},{
-						id: 16,
-						active: true,
-						status: false,
-						title: 'Generator',
-						description: 'Zone 1'
-					},{
-						id: 17,
-						active: true,
-						status: false,
-						title: 'Generator',
-						description: 'Zone 2'
-					},{
-						id: 18,
-						active: true,
-						status: false,
-						title: 'Generator',
-						description: 'Zone 3'
-					},{
-						id: 19,
+						id: 23,
 						active: true,
 						status: true,
-						title: 'Control Room',
-						description: 'Lighing'
+						title: 'AC'
 					},{
-						id: 19,
+						id: 24,
 						active: true,
-						status: true,
-						title: 'Control Room',
-						description: 'Genetaor'
+						status: false,
+						title: 'Ambient Lighting'
 					},{
-						id: 19,
+						id: 25,
 						active: true,
-						status: true,
-						title: 'Control Room',
-						description: 'Air Condition'
+						status: false,
+						title: 'Music System'
 					}
-				];break;
+				]; break;
+				case 3: $scope.devicelist = [
+					{
+						id: 31,
+						active: true,
+						status: false,
+						title: 'Light'
+					},{
+						id: 32,
+						active: true,
+						status: true,
+						title: 'Exhaust'
+					},{
+						id: 33,
+						active: true,
+						status: false,
+						title: 'Coffee Machine'
+					},{
+						id: 34,
+						active: true,
+						status: false,
+						title: 'Toaster'
+					}
+				]; break;
+				case 4: $scope.devicelist = [
+					{
+						id: 41,
+						active: true,
+						status: false,
+						title: 'Light'
+					},{
+						id: 42,
+						active: true,
+						status: true,
+						title: 'AC'
+					},{
+						id: 33,
+						active: true,
+						status: false,
+						title: 'Fan'
+					}
+				]; break;
 			}
 		}
 	});

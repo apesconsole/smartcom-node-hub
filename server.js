@@ -24,8 +24,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 //MongoDB Connection Details
 var cloudMonGoDBConfig = {
-	mongoUsr		: process.env.MONGODB_USR 			|| '',
-	mongoSession	: process.env.MONGODB_SESSION_URL 	|| '' 
+	mongoUsr		: process.env.MONGODB_USR 			|| 'mongodb://admin:admin@ds113630.mlab.com:13630/smartcom_user',
+	mongoSession	: process.env.MONGODB_SESSION_URL 	|| 'mongodb://admin:admin@ds153521.mlab.com:53521/smartcom_session' 
 }
 var mongoose = require('mongoose');
 mongoose.connect(cloudMonGoDBConfig.mongoSession);
@@ -101,7 +101,7 @@ app.post("/auth", function(req, res){
 					req.session.userId = userInfo.userId;
 					req.session.name = userInfo.name;
 					req.session.type = userInfo.type;
-					res.redirect('/power');
+					res.redirect('/' + userInfo.homeUrl);
 				}, 
 				//If In-Valid User Call 
 				failure: function(){
@@ -153,6 +153,12 @@ app.get("/zone", function(req,res){
 	if(req.session.name == undefined)
 		res.redirect('/login');
 	else res.sendFile(path + req.session.type + '-zone.html');
+});
+
+app.get("/dashboard", function(req,res){
+	if(req.session.name == undefined)
+		res.redirect('/login');
+	else res.sendFile(path + req.session.type + '-dashboard.html');
 });
 
 app.get("/logout", function(req,res){
