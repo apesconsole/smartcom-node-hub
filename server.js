@@ -24,8 +24,8 @@ app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 //MongoDB Connection Details
 var cloudMonGoDBConfig = {
-	mongoUsr		: process.env.MONGODB_USR 			|| 'mongodb://admin:admin@ds113630.mlab.com:13630/smartcom_user',
-	mongoSession	: process.env.MONGODB_SESSION_URL 	|| 'mongodb://admin:admin@ds153521.mlab.com:53521/smartcom_session' 
+	mongoUsr		: process.env.MONGODB_USR 			|| '',
+	mongoSession	: process.env.MONGODB_SESSION_URL 	|| '' 
 }
 var mongoose = require('mongoose');
 mongoose.connect(cloudMonGoDBConfig.mongoSession);
