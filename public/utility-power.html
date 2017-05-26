@@ -42,17 +42,30 @@
 	</style>	
 	<!-- Styles -->
 	<style>
-	#chartdiv {
+	#cnsmp-chart {
 		width	: 100%;
-		height	: 400px;
-	}					
+		height	: 300px;
+	}
+	#avg-cnsmp-chart {
+		width	: 100%;
+		height	: 300px;
+	}	
+	#mnthly-chart {
+		width	: 100%;
+		height	: 300px;
+	}
+	#pie-chart {
+		width	: 100%;
+		height	: 300px;
+	}
 	</style>
 	<!-- Resources -->
 	<script src="https://www.amcharts.com/lib/3/amcharts.js"></script>
 	<script src="https://www.amcharts.com/lib/3/serial.js"></script>
+	<script src="https://www.amcharts.com/lib/3/pie.js"></script>
 	<script src="https://www.amcharts.com/lib/3/plugins/export/export.min.js"></script>
 	<link rel="stylesheet" href="https://www.amcharts.com/lib/3/plugins/export/export.css" type="text/css" media="all" />
-	<script src="https://www.amcharts.com/lib/3/themes/light.js"></script>
+	<script src="https://www.amcharts.com/lib/3/themes/light.js"></script>	
 
   </head>
 
@@ -63,7 +76,7 @@
         <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0;  background-color: #687888;">
 			<div class="navbar-header">
                 <a class="navbar-brand" style='color: white; font-size: 12px;' href="power">
-					<strong style='font-size: 20px;'>SmartCom | </strong> <strong> Welcome</strong> : {{name}}
+					<strong style='font-size: 17px; font-style:italic;'>smart<strong style='font-size: 20px; font-style:italic;'>Com</strong> | </strong> <strong> Welcome</strong> : {{name}}
 				</a>
             </div>
 			<leftmenu></leftmenu>
@@ -72,19 +85,114 @@
 			<div class="row">
 				<div class="col-lg-12">
 					<h1 class="page-header fonty">Power Management</h1>
-					<ul class="nav navbar-nav">
-						<li><a href="#" onclick="displayDaily()">Daily</a></li>
-						<li><a href="#" onclick="displayDaily()">Weekly</a></li>
-						<li><a href="#" onclick="displayDaily()">Monthly</a></li>
-					</ul>
-				</div>
-				<!-- /.col-lg-12 -->
-				<div class="col-lg-12 fonty">	
-					<!-- Chart HTML -->
-					<div id="chartdiv"></div>	
-
-				</div>
-			</div>		
+				</div>	
+			</div>
+			<div class="row">		
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-green">
+                        <div class="panel-heading">
+                            <div class="row">							
+                                <div class="col-xs-10 text-left">
+                                    <div>Grid Intake: <strong>5000 U</strong></div>
+									<div>Diesel Generator: <strong>200 U</strong></div>
+									<div>Solar Energy:  <strong>2500 U</strong></div>
+                                </div>									
+                            </div>
+                        </div>
+                    </div>
+                </div>	
+				<div class="col-lg-3 col-md-6">
+                    <div class="panel panel-primary">
+                        <div class="panel-heading">
+                            <div class="row">						
+								<div class="col-xs-12 text-left">
+									<div>Solar Panel Power Generation</div>
+                                    <div>Zone A: <strong>100%</strong></div>
+									<div>Zone B: <strong>80%</strong></div>
+									<div>Zone C: <strong>100%</strong></div>
+									<div>Zone D: <strong>Down</strong></div>
+                                </div>							
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+					<div class="panel panel-yellow">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+                                    <button type="button" class="btn btn-primary btn-xs">Read</button>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge">2</div>
+                                    <div>Community</div>
+									<div>Notifications</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>			
+                <div class="col-lg-3 col-md-6">
+                    <div class="panel panel-red">
+                        <div class="panel-heading">
+                            <div class="row">
+                                <div class="col-xs-3">
+									<button type="button" class="btn btn-primary btn-xs">Requests</button>
+                                </div>
+                                <div class="col-xs-9 text-right">
+                                    <div class="huge">1</div>
+									<div class="">Ticket</div>
+                                    <div class="">Status : In Progress</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>				
+			</div>			
+			<div class="row">
+                <div class="col-lg-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Consumption
+                        </div>
+                        <div class="panel-body">
+                            <div id="cnsmp-chart"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Average Consumption / Occupancy
+                        </div>
+                        <div class="panel-body">
+                            <div id="avg-cnsmp-chart"></div>
+                        </div>
+                    </div>
+                </div>				
+			</div>
+			<div class="row">
+                <div class="col-lg-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Monthly Trend
+                        </div>
+                        <div class="panel-body">
+                            <div id="mnthly-chart"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                    <div class="panel panel-default">
+                        <div class="panel-heading">
+                            Pie Chart
+                        </div>
+                        <div class="panel-body">
+                            <div id="pie-chart"></div>
+                        </div>
+                    </div>
+                </div>				
+			</div>			
 		</div>
 	</div>
 	<!-- Angular -->
@@ -104,94 +212,195 @@
 </html>
 <script>
 	var home = angular.module('homeApp', []);	
-	var displayDaily = function(){
-		<!-- Chart code -->
-		var chart = AmCharts.makeChart( "chartdiv", {
-		  "type": "serial",
-		  "addClassNames": true,
-		  "theme": "light",
-		  "autoMargins": false,
-		  "marginLeft": 30,
-		  "marginRight": 8,
-		  "marginTop": 10,
-		  "marginBottom": 26,
-		  "balloon": {
-			"adjustBorderColor": false,
-			"horizontalPadding": 10,
-			"verticalPadding": 8,
-			"color": "#687888"
-		  },
+	var displayConsumption = function(){
+		var chart = AmCharts.makeChart( "cnsmp-chart", {
+			"theme": "light",
+			"type": "serial",
+			"dataProvider": [
+				{
+					'_id': 'Zone 1' , value: 5456
+				},{
+					'_id': 'Zone 2' , value: 4231
+				},{
+					'_id': 'Zone 3' , value: 4543
+				},{
+					'_id': 'Zone 4' , value: 1834
+				},{
+					'_id': 'Common' , value: 3232
+				}
+			],
+			"valueAxes": [{
+				"title": "Consumption"
+			}],
+			"graphs": [{
+				"balloonText": "Consumption in [[category]] : [[value]] per Month",
+				"fillAlphas": 1,
+				"lineAlpha": 0.2,
+				"title": "Zone",
+				"type": "column",
+				"valueField": "value"
+			}],
+			"rotate": false,
+			"categoryField": "_id",
+			"categoryAxis": {
+				"gridPosition": "start",
+				"fillAlpha": 0.05,
+				"position": "left",
+			},
+			"export": {
+				"enabled": false
+			 }
+		});
+	}
+	var displayAvgConsumption = function(){
+		var chart = AmCharts.makeChart( "avg-cnsmp-chart", {
+			"theme": "light",
+			"type": "serial",
+			"dataProvider": [
+				{
+					'_id': 'Zone 1' , value: 2323
+				},{
+					'_id': 'Zone 2' , value: 3454
+				},{
+					'_id': 'Zone 3' , value: 4066
+				},{
+					'_id': 'Zone 4' , value: 1500
+				},{
+					'_id': 'Common' , value: 3212
+				}
+			],
+			"valueAxes": [{
+				"title": "Average Consumption"
+			}],
+			"graphs": [{
+				"balloonText": "Consumption in [[category]] : [[value]]  per Month",
+				"fillAlphas": 1,
+				"lineAlpha": 0.2,
+				"title": "Zone",
+				"type": "column",
+				"valueField": "value"
+			}],
+			"rotate": false,
+			"categoryField": "_id",
+			"categoryAxis": {
+				"gridPosition": "start",
+				"fillAlpha": 0.05,
+				"position": "left",
+			},
+			"export": {
+				"enabled": false
+			 }
+		});
+	}
+	var monthlyTrend = function(){
+		var chart = AmCharts.makeChart("mnthly-chart", {
+			"type": "serial",
+			 "theme": "light",
+			"categoryField": "month",
+			"rotate": true,
+			"startDuration": 1,
+			"categoryAxis": {
+				"gridPosition": "start",
+				"position": "left"
+			},
+			"trendLines": [],
+			"graphs": [
+				{
+					"balloonText": "Zone 1:[[value]]",
+					"fillAlphas": 0.8,
+					"id": "AmGraph-1",
+					"lineAlpha": 0.2,
+					"title": "Zone 1",
+					"type": "column",
+					"valueField": "zone1"
+				}, {
+					"balloonText": "Zone 2:[[value]]",
+					"fillAlphas": 0.8,
+					"id": "AmGraph-2",
+					"lineAlpha": 0.2,
+					"title": "Zone 2",
+					"type": "column",
+					"valueField": "zone2"
+				}, {
+					"balloonText": "Zone 3:[[value]]",
+					"fillAlphas": 0.8,
+					"id": "AmGraph-3",
+					"lineAlpha": 0.2,
+					"title": "Zone 3",
+					"type": "column",
+					"valueField": "zone3"
+				}
+			],
+			"guides": [],
+			"valueAxes": [
+				{
+					"id": "ValueAxis-1",
+					"position": "top",
+					"axisAlpha": 0
+				}
+			],
+			"allLabels": [],
+			"balloon": {},
+			"titles": [],
+			"dataProvider": [
+				{
+					"month": 'Jan',
+					"zone1": 23.5,
+					"zone2": 18.1,
+					"zone3": 23.5
+				},
+				{
+					"month": 'Feb',
+					"zone1": 27.9,
+					"zone2": 23.1,
+					"zone3": 22.5
+				},
+				{
+					"month": 'Mar',
+					"zone1": 33.1,
+					"zone2": 25.4,
+					"zone3": 26.5
+				},
+				{
+					"month": 'Apr',
+					"zone1": 44.4,
+					"zone2": 27.1,
+					"zone3": 29.5
+				}
+			],
+			"export": {
+				"enabled": true
+			 }
 
+		});	
+	}
+	
+	var displayPie = function(){
+		var chart = AmCharts.makeChart( "pie-chart", {
+		  "type": "pie",
+		  "theme": "light",
 		  "dataProvider": [ {
-			"year": 2009,
-			"income": 23.5,
-			"expenses": 21.1
+			"category": "Solar",
+			"value": 260
 		  }, {
-			"year": 2010,
-			"income": 26.2,
-			"expenses": 30.5
+			"category": "Grid",
+			"value": 201
 		  }, {
-			"year": 2011,
-			"income": 30.1,
-			"expenses": 34.9
-		  }, {
-			"year": 2012,
-			"income": 29.5,
-			"expenses": 31.1
-		  }, {
-			"year": 2013,
-			"income": 30.6,
-			"expenses": 28.2,
-			"dashLengthLine": 5
-		  }, {
-			"year": 2014,
-			"income": 34.1,
-			"expenses": 32.9,
-			"dashLengthColumn": 5,
-			"alpha": 0.2,
-			"additional": "(projection)"
+			"category": "Diesel",
+			"value": 65
 		  } ],
-		  "valueAxes": [ {
-			"axisAlpha": 0,
-			"position": "left"
-		  } ],
-		  "startDuration": 1,
-		  "graphs": [ {
-			"alphaField": "alpha",
-			"balloonText": "<span style='font-size:12px;'>[[title]] in [[category]]:<br><span style='font-size:20px;'>[[value]]</span> [[additional]]</span>",
-			"fillAlphas": 1,
-			"title": "Income",
-			"type": "column",
-			"valueField": "income",
-			"dashLengthField": "dashLengthColumn"
-		  }, {
-			"id": "graph2",
-			"balloonText": "<span style='font-size:12px;'>[[title]] in [[category]]:<br><span style='font-size:20px;'>[[value]]</span> [[additional]]</span>",
-			"bullet": "round",
-			"lineThickness": 3,
-			"bulletSize": 7,
-			"bulletBorderAlpha": 1,
-			"bulletColor": "#687888",
-			"useLineColorForBulletBorder": true,
-			"bulletBorderThickness": 3,
-			"fillAlphas": 0,
-			"lineAlpha": 1,
-			"title": "Expenses",
-			"valueField": "expenses",
-			"dashLengthField": "dashLengthLine"
-		  } ],
-		  "categoryField": "year",
-		  "categoryAxis": {
-			"gridPosition": "start",
-			"axisAlpha": 0,
-			"tickLength": 0
-		  },
+		  "valueField": "value",
+		  "titleField": "category",
+		  "outlineAlpha": 0.4,
+		  "depth3D": 15,
+		  "balloonText": "[[title]]<br><span style='font-size:14px'><b>[[value]]</b> ([[percents]]%)</span>",
+		  "angle": 30,
 		  "export": {
 			"enabled": true
 		  }
 		} );	
 	}
-
+	
 	home.directive('leftmenu', function($compile) {
 		var directive = {};
 		directive.restrict = 'E';
@@ -205,7 +414,10 @@
 		$http.get("/getuser")
 		.then(function(response) {
 			$scope.name = response.data.name;
-			displayDaily();
+			displayConsumption();
+			displayAvgConsumption();
+			monthlyTrend();
+			displayPie();
 		});	
 	});
 

@@ -48,7 +48,7 @@
         <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0;  background-color: #687888;">
 			<div class="navbar-header">
                 <a class="navbar-brand" style='color: white; font-size: 12px;' href="power">
-					<strong style='font-size: 20px;'>SmartCom | </strong> <strong> Welcome</strong> : {{name}}
+					<strong style='font-size: 17px; font-style:italic;'>smart<strong style='font-size: 20px; font-style:italic;'>Com</strong> | </strong> <strong> Welcome</strong> : {{name}}
 				</a>
             </div>				
 			<leftmenu></leftmenu>
@@ -150,7 +150,7 @@
 				title: 'Zone 3'
 			},{
 				zoneId: 4,
-				title: 'Common Utility'
+				title: 'Common'
 			}
 		];
 		var selectTab = function(zoneId, zonelist){
@@ -219,6 +219,30 @@
 						status: true,
 						title: 'Lighting',
 						description: 'Stairway - Floor 6'
+					},{
+						id: 10,
+						active: true,
+						status: true,
+						title: 'Lighting',
+						description: 'Parking Lot A'
+					},{
+						id: 11,
+						active: true,
+						status: true,
+						title: 'Lighting',
+						description: 'Parking Lot B'
+					},{
+						id: 12,
+						active: true,
+						status: false,
+						title: 'Generator',
+						description: 'Diesel Powered'
+					},{
+						id: 12,
+						active: true,
+						status: true,
+						title: 'Solar Pannel',
+						description: '1 MWATT - Roof Top Solar Pannel'
 					}
 				]; break;
 				case 4: $scope.utilitylist = [
@@ -277,17 +301,53 @@
 						title: 'Control Room',
 						description: 'Lighing'
 					},{
-						id: 19,
+						id: 20,
 						active: true,
 						status: true,
 						title: 'Control Room',
 						description: 'Genetaor'
 					},{
-						id: 19,
+						id: 21,
 						active: true,
 						status: true,
 						title: 'Control Room',
 						description: 'Air Condition'
+					},{
+						id: 22,
+						active: true,
+						status: true,
+						title: 'Gym',
+						description: 'Air Condition'
+					},{
+						id: 23,
+						active: true,
+						status: true,
+						title: 'Gym',
+						description: 'Light - 1'
+					},{
+						id: 24,
+						active: true,
+						status: true,
+						title: 'Gym',
+						description: 'Light - 2'
+					},{
+						id: 25,
+						active: true,
+						status: true,
+						title: 'Gym',
+						description: 'Light - 3'
+					},{
+						id: 26,
+						active: true,
+						status: false,
+						title: 'Water Pump',
+						description: 'Unit 1'
+					},{
+						id: 27,
+						active: true,
+						status: false,
+						title: 'Water Pump',
+						description: 'Unit 2'
 					}
 				];break;
 			}
