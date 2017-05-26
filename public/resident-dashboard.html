@@ -50,37 +50,19 @@
 
   <body>
 	<style>			
-	#hall-chart {
-		width		: 100%;
-		height		: 300px;
-		font-size	: 11px;
-	}	
-	#mstrm-chart {
-		width		: 100%;
-		height		: 300px;
-		font-size	: 11px;
-	}		
-	#chldrm-chart {
-		width		: 100%;
-		height		: 300px;
-		font-size	: 11px;
-	}	
-	#ktchn-chart {
-		width		: 100%;
-		height		: 300px;
-		font-size	: 11px;
-	}
 	#usage-chart {
 		width		: 100%;
-		height		: 300px;
+		height		: 400px;
 		font-size	: 11px;
-	}	
+	}		
 	</style>
     <div id="wrapper" ng-app="homeApp" ng-controller="homeCtrl">
         <!-- Navigation -->
         <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0;  background-color: #687888;">
 			<div class="navbar-header">
-                <a class="navbar-brand" style='color: white; font-size: 12px;' href="home"><strong>User</strong> : {{name}}</a>
+                <a class="navbar-brand" style='color: white; font-size: 12px;' href="power">
+					<strong style='font-size: 20px;'>SmartCom | </strong> <strong> Welcome</strong> : {{name}}
+				</a>
             </div>
 			<leftmenu></leftmenu>
 		</nav>
@@ -155,43 +137,13 @@
                 </div>				
 			</div>
 			<div class="row">
-                <div class="col-lg-6">
+                <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Hall
+                            Usage
                         </div>
                         <div class="panel-body">
-                            <div id="hall-chart"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Master Room
-                        </div>
-                        <div class="panel-body">
-                            <div id="mstrm-chart"></div>
-                        </div>
-                    </div>
-                </div>	
-                <div class="col-lg-6">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Children's Room
-                        </div>
-                        <div class="panel-body">
-                            <div id="chldrm-chart"></div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Kitchen
-                        </div>
-                        <div class="panel-body">
-                            <div id="ktchn-chart"></div>
+                            <div id="usage-chart"></div>
                         </div>
                     </div>
                 </div>				
@@ -215,249 +167,454 @@
 </html>
 <script>
 	var home = angular.module('homeApp', []);	
-	var loadUtilityExpence = function(){
+	var loadUsageChart = function(){
 		var chart = AmCharts.makeChart("usage-chart", {
-			"theme": "light",
 			"type": "serial",
-			"dataProvider": [{
-				"utility": 'Electricity',
-				"bill": 3500
-			}, {
-				"utility": 'Gas',
-				"bill": 1200
-			}, {
-				"utility": 'Internet',
-				"bill": 900
-			}, {
-				"utility": 'Water',
-				"bill": 500
-			}, {
-				"utility": 'Waste Management',
-				"bill": 500
-			}, {
-				"utility": 'Community',
-				"bill": 3000
-			}],
+			"theme": "light",
+			"marginRight": 40,
+			"marginLeft": 40,
+			"autoMarginOffset": 20,
+			"mouseWheelZoomEnabled":true,
+			"dataDateFormat": "YYYY-MM-DD",
 			"valueAxes": [{
-				"title": "Billing: INR"
+				"id": "v1",
+				"axisAlpha": 0,
+				"position": "left",
+				"ignoreAxisWidth":true
 			}],
+			"balloon": {
+				"borderThickness": 1,
+				"shadowAlpha": 0
+			},
 			"graphs": [{
-				"balloonText": "Expense in [[category]]:[[value]]",
-				"fillAlphas": 1,
-				"lineAlpha": 0.2,
-				"title": "Expense",
-				"type": "column",
-				"valueField": "bill"
+				"id": "g1",
+				"balloon":{
+				  "drop":true,
+				  "adjustBorderColor":false,
+				  "color":"#ffffff"
+				},
+				"bullet": "round",
+				"bulletBorderAlpha": 1,
+				"bulletColor": "#FFFFFF",
+				"bulletSize": 5,
+				"hideBulletsCount": 50,
+				"lineThickness": 2,
+				"title": "red line",
+				"useLineColorForBulletBorder": true,
+				"valueField": "value",
+				"balloonText": "<span style='font-size:18px;'>[[value]]</span>"
 			}],
-			"depth3D": 20,
-			"angle": 30,
-			"rotate": true,
-			"categoryField": "utility",
+			"chartScrollbar": {
+				"graph": "g1",
+				"oppositeAxis":false,
+				"offset":30,
+				"scrollbarHeight": 80,
+				"backgroundAlpha": 0,
+				"selectedBackgroundAlpha": 0.1,
+				"selectedBackgroundColor": "#888888",
+				"graphFillAlpha": 0,
+				"graphLineAlpha": 0.5,
+				"selectedGraphFillAlpha": 0,
+				"selectedGraphLineAlpha": 1,
+				"autoGridCount":true,
+				"color":"#AAAAAA"
+			},
+			"chartCursor": {
+				"pan": true,
+				"valueLineEnabled": true,
+				"valueLineBalloonEnabled": true,
+				"cursorAlpha":1,
+				"cursorColor":"#258cbb",
+				"limitToGraph":"g1",
+				"valueLineAlpha":0.2,
+				"valueZoomable":true
+			},
+			"valueScrollbar":{
+			  "oppositeAxis":false,
+			  "offset":50,
+			  "scrollbarHeight":10
+			},
+			"categoryField": "date",
 			"categoryAxis": {
-				"gridPosition": "start",
-				"fillAlpha": 0.05,
-				"position": "left"
+				"parseDates": true,
+				"dashLength": 1,
+				"minorGridEnabled": true
 			},
 			"export": {
 				"enabled": true
-			 }
-		});	
-	}
-	var loadHallChart = function(){
-		var chart = AmCharts.makeChart( "hall-chart", {
-			"theme": "patterns",
-			"type": "serial",
-			"dataProvider": [
-				{ 
-					"_id" : "Friday", 
-					"value" : 5.0
-				},{  
-					"_id" : "Monday", 
-					"value" : 11.0
-				},{ 
-					"_id" : "Saturday", 
-					"value" : 3.0
-				},{  
-					"_id" : "Sunday", 
-					"value" : 1.0
-				},{ 
-					"_id" : "Thursday", 
-					"value" : 8.0
-				},{  
-					"_id" : "Tuesday", 
-					"value" : 6.0
-				},{ 
-					"_id" : "Wednesday", 
-					"value" : 4.0
-				}
-			],
-			"valueAxes": [{
-				"title": "Utility Usage per Day in Hall Room"
-			}],
-			"graphs": [{
-				"balloonText": "Utility Usage on [[category]]:[[value]]",
-				"fillAlphas": 1,
-				"lineAlpha": 0.2,
-				"title": "Day",
-				"type": "column",
-				"valueField": "value"
-			}],
-			"rotate": false,
-			"categoryField": "_id",
-			"categoryAxis": {
-				"gridPosition": "start",
-				"fillAlpha": 0.05,
-				"position": "left",
 			},
-			"export": {
-				"enabled": false
-			 }
+			"dataProvider": [{
+				"date": "2017-01-27",
+				"value": 13
+			}, {
+				"date": "2017-01-28",
+				"value": 11
+			}, {
+				"date": "2017-01-29",
+				"value": 15
+			}, {
+				"date": "2017-01-30",
+				"value": 16
+			}, {
+				"date": "2017-01-31",
+				"value": 18
+			}, {
+				"date": "2017-02-01",
+				"value": 13
+			}, {
+				"date": "2017-02-02",
+				"value": 22
+			}, {
+				"date": "2017-02-03",
+				"value": 23
+			}, {
+				"date": "2017-02-04",
+				"value": 20
+			}, {
+				"date": "2017-02-05",
+				"value": 17
+			}, {
+				"date": "2017-02-06",
+				"value": 16
+			}, {
+				"date": "2017-02-07",
+				"value": 18
+			}, {
+				"date": "2017-02-08",
+				"value": 21
+			}, {
+				"date": "2017-02-09",
+				"value": 26
+			}, {
+				"date": "2017-02-10",
+				"value": 24
+			}, {
+				"date": "2017-02-11",
+				"value": 29
+			}, {
+				"date": "2017-02-12",
+				"value": 32
+			}, {
+				"date": "2017-02-13",
+				"value": 18
+			}, {
+				"date": "2017-02-14",
+				"value": 24
+			}, {
+				"date": "2017-02-15",
+				"value": 22
+			}, {
+				"date": "2017-02-16",
+				"value": 18
+			}, {
+				"date": "2017-02-17",
+				"value": 19
+			}, {
+				"date": "2017-02-18",
+				"value": 14
+			}, {
+				"date": "2017-02-19",
+				"value": 15
+			}, {
+				"date": "2017-02-20",
+				"value": 12
+			}, {
+				"date": "2017-02-21",
+				"value": 8
+			}, {
+				"date": "2017-02-22",
+				"value": 9
+			}, {
+				"date": "2017-02-23",
+				"value": 8
+			}, {
+				"date": "2017-02-24",
+				"value": 7
+			}, {
+				"date": "2017-02-25",
+				"value": 5
+			}, {
+				"date": "2017-02-26",
+				"value": 11
+			}, {
+				"date": "2017-02-27",
+				"value": 13
+			}, {
+				"date": "2017-02-28",
+				"value": 18
+			}, {
+				"date": "2017-02-29",
+				"value": 20
+			}, {
+				"date": "2017-03-01",
+				"value": 42
+			}, {
+				"date": "2017-03-02",
+				"value": 35
+			}, {
+				"date": "2017-03-03",
+				"value": 31
+			}, {
+				"date": "2017-03-04",
+				"value": 47
+			}, {
+				"date": "2017-03-05",
+				"value": 52
+			}, {
+				"date": "2017-03-06",
+				"value": 46
+			}, {
+				"date": "2017-03-07",
+				"value": 41
+			}, {
+				"date": "2017-03-08",
+				"value": 43
+			}, {
+				"date": "2017-03-09",
+				"value": 40
+			}, {
+				"date": "2017-03-10",
+				"value": 39
+			}, {
+				"date": "2017-03-11",
+				"value": 34
+			}, {
+				"date": "2017-03-12",
+				"value": 29
+			}, {
+				"date": "2017-03-13",
+				"value": 34
+			}, {
+				"date": "2017-03-14",
+				"value": 37
+			}, {
+				"date": "2017-03-15",
+				"value": 42
+			}, {
+				"date": "2017-03-16",
+				"value": 49
+			}, {
+				"date": "2017-03-17",
+				"value": 46
+			}, {
+				"date": "2017-03-18",
+				"value": 47
+			}, {
+				"date": "2017-03-19",
+				"value": 55
+			}, {
+				"date": "2017-03-20",
+				"value": 59
+			}, {
+				"date": "2017-03-21",
+				"value": 58
+			}, {
+				"date": "2017-03-22",
+				"value": 57
+			}, {
+				"date": "2017-03-23",
+				"value": 61
+			}, {
+				"date": "2017-03-24",
+				"value": 59
+			}, {
+				"date": "2017-03-25",
+				"value": 67
+			}, {
+				"date": "2017-03-26",
+				"value": 65
+			}, {
+				"date": "2017-03-27",
+				"value": 61
+			}, {
+				"date": "2017-03-28",
+				"value": 66
+			}, {
+				"date": "2017-03-29",
+				"value": 69
+			}, {
+				"date": "2017-03-30",
+				"value": 71
+			}, {
+				"date": "2017-03-31",
+				"value": 71
+			}, {
+				"date": "2017-04-01",
+				"value": 67
+			}, {
+				"date": "2017-04-02",
+				"value": 63
+			}, {
+				"date": "2017-04-03",
+				"value": 46
+			}, {
+				"date": "2017-04-04",
+				"value": 32
+			}, {
+				"date": "2017-04-05",
+				"value": 21
+			}, {
+				"date": "2017-04-06",
+				"value": 18
+			}, {
+				"date": "2017-04-07",
+				"value": 21
+			}, {
+				"date": "2017-04-08",
+				"value": 28
+			}, {
+				"date": "2017-04-09",
+				"value": 27
+			}, {
+				"date": "2017-04-10",
+				"value": 36
+			}, {
+				"date": "2017-04-11",
+				"value": 33
+			}, {
+				"date": "2017-04-12",
+				"value": 31
+			}, {
+				"date": "2017-04-13",
+				"value": 30
+			}, {
+				"date": "2017-04-14",
+				"value": 34
+			}, {
+				"date": "2017-04-15",
+				"value": 38
+			}, {
+				"date": "2017-04-16",
+				"value": 37
+			}, {
+				"date": "2017-04-17",
+				"value": 44
+			}, {
+				"date": "2017-04-18",
+				"value": 49
+			}, {
+				"date": "2017-04-19",
+				"value": 53
+			}, {
+				"date": "2017-04-20",
+				"value": 57
+			}, {
+				"date": "2017-04-21",
+				"value": 60
+			}, {
+				"date": "2017-04-22",
+				"value": 61
+			}, {
+				"date": "2017-04-23",
+				"value": 69
+			}, {
+				"date": "2017-04-24",
+				"value": 67
+			}, {
+				"date": "2017-04-25",
+				"value": 72
+			}, {
+				"date": "2017-04-26",
+				"value": 77
+			}, {
+				"date": "2017-04-27",
+				"value": 75
+			}, {
+				"date": "2017-04-28",
+				"value": 70
+			}, {
+				"date": "2017-04-29",
+				"value": 72
+			}, {
+				"date": "2017-04-30",
+				"value": 70
+			}, {
+				"date": "2017-05-01",
+				"value": 73
+			}, {
+				"date": "2017-05-02",
+				"value": 67
+			}, {
+				"date": "2017-05-03",
+				"value": 68
+			}, {
+				"date": "2017-05-04",
+				"value": 65
+			}, {
+				"date": "2017-05-05",
+				"value": 71
+			}, {
+				"date": "2017-05-06",
+				"value": 75
+			}, {
+				"date": "2017-05-07",
+				"value": 74
+			}, {
+				"date": "2017-05-08",
+				"value": 71
+			}, {
+				"date": "2017-05-09",
+				"value": 76
+			}, {
+				"date": "2017-05-10",
+				"value": 77
+			}, {
+				"date": "2017-05-11",
+				"value": 81
+			}, {
+				"date": "2017-05-12",
+				"value": 83
+			}, {
+				"date": "2017-05-13",
+				"value": 80
+			}, {
+				"date": "2017-05-14",
+				"value": 81
+			}, {
+				"date": "2017-05-15",
+				"value": 87
+			}, {
+				"date": "2017-05-16",
+				"value": 82
+			}, {
+				"date": "2017-05-17",
+				"value": 86
+			}, {
+				"date": "2017-05-18",
+				"value": 80
+			}, {
+				"date": "2017-05-19",
+				"value": 87
+			}, {
+				"date": "2017-05-20",
+				"value": 83
+			}, {
+				"date": "2017-05-21",
+				"value": 24
+			}, {
+				"date": "2017-05-22",
+				"value": 22
+			}, {
+				"date": "2017-05-23",
+				"value": 43
+			}, {
+				"date": "2017-05-24",
+				"value": 43
+			}, {
+				"date": "2017-05-25",
+				"value": 76
+			}]
 		});
-	}
-	
-	var loadMstRmChart = function(){
-		var chart = AmCharts.makeChart( "mstrm-chart", {
-			"theme": "patterns",
-			"type": "serial",
-			"dataProvider": [
-				{ 
-					"_id" : "Friday", 
-					"value" : 3.0
-				},{ 
-					"_id" : "Monday", 
-					"value" : 7.0
-				},{ 
-					"_id" : "Sunday", 
-					"value" : 1.0
-				},{ 
-					"_id" : "Thursday", 
-					"value" : 3.0
-				},{ 
-					"_id" : "Tuesday", 
-					"value" : 5.0
-				}
-			],
-			"valueAxes": [{
-				"title": "Utility Usage per Day in Master Room"
-			}],
-			"graphs": [{
-				"balloonText": "Utility Usage on [[category]]:[[value]]",
-				"fillAlphas": 1,
-				"lineAlpha": 0.2,
-				"title": "Day",
-				"type": "column",
-				"valueField": "value"
-			}],
-			"rotate": false,
-			"categoryField": "_id",
-			"categoryAxis": {
-				"gridPosition": "start",
-				"fillAlpha": 0.05,
-				"position": "left",
-			},
-			"export": {
-				"enabled": false
-			 }
-		});
-	}	
 
-	var loadChldRmChart = function(){
-		var chart = AmCharts.makeChart( "chldrm-chart", {
-			"theme": "patterns",
-			"type": "serial",
-			"dataProvider": [
-					{ 
-						"_id" : "Friday", 
-						"value" : 8.0
-					},{  
-						"_id" : "Monday", 
-						"value" : 18.0
-					},{  
-						"_id" : "Saturday", 
-						"value" : 1.0
-					},{ 
-						"_id" : "Thursday", 
-						"value" : 7.0
-					},{  
-						"_id" : "Tuesday", 
-						"value" : 9.0
-					},{  
-						"_id" : "Wednesday", 
-						"value" : 1.0
-					}			
-			],
-			"valueAxes": [{
-				"title": "Utility Usage per Day in Children\s Room"
-			}],
-			"graphs": [{
-				"balloonText": "Utility Usage on [[category]]:[[value]]",
-				"fillAlphas": 1,
-				"lineAlpha": 0.2,
-				"title": "Day",
-				"type": "column",
-				"valueField": "value"
-			}],
-			"rotate": false,
-			"categoryField": "_id",
-			"categoryAxis": {
-				"gridPosition": "start",
-				"fillAlpha": 0.05,
-				"position": "left",
-			},
-			"export": {
-				"enabled": false
-			 }
-		});
+		chart.addListener("rendered", zoomChart);
+
+		zoomChart();
+
+		function zoomChart() {
+			chart.zoomToIndexes(chart.dataProvider.length - 40, chart.dataProvider.length - 1);
+		}
 	}	
 	
-	var loadKtchnRmChart = function(){
-		var chart = AmCharts.makeChart( "ktchn-chart", {
-			"theme": "patterns",
-			"type": "serial",
-			"dataProvider": [
-				{ 
-					"_id" : "Friday", 
-					"value" : 3.0
-				},{  
-					"_id" : "Monday", 
-					"value" : 7.0
-				},{  
-					"_id" : "Sunday", 
-					"value" : 1.0
-				},{ 
-					"_id" : "Thursday", 
-					"value" : 3.0
-				},{ 
-					"_id" : "Tuesday", 
-					"value" : 5.0
-				},{  
-					"_id" : "Wednesday", 
-					"value" : 1.0
-				}				
-			],
-			"valueAxes": [{
-				"title": "Utility Usage per Day in Kitchen"
-			}],
-			"graphs": [{
-				"balloonText": "Utility Usage on [[category]]:[[value]]",
-				"fillAlphas": 1,
-				"lineAlpha": 0.2,
-				"title": "Day",
-				"type": "column",
-				"valueField": "value"
-			}],
-			"rotate": false,
-			"categoryField": "_id",
-			"categoryAxis": {
-				"gridPosition": "start",
-				"fillAlpha": 0.05,
-				"position": "left",
-			},
-			"export": {
-				"enabled": false
-			 }
-		});
-	}	
 	home.directive('leftmenu', function($compile) {
 		var directive = {};
 		directive.restrict = 'E';
@@ -472,10 +629,7 @@
 		.then(function(response) {
 			$scope.name = response.data.name;
 		});	
-		loadUtilityExpence();
-		loadHallChart();
-		loadMstRmChart();
-		loadChldRmChart();
-		loadKtchnRmChart();
+		loadUsageChart();
+
 	});
 </script>

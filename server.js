@@ -82,6 +82,28 @@ app.get("/getuser", function(req,res){
 	else res.json({});
 });
 
+app.get("/getuserprofile", function(req,res){
+	logger.log('req.session.userId = '+ req.session.userId);
+	if(req.session.userId != undefined){
+		userValidatoin( {
+		        //User Entered Information
+				userId: req.session.userId, 
+				name: req.session.name,
+				type: req.session.type
+			}, { 
+				//If Valid User respond
+				success: function(userInfo){
+					res.json(userInfo);
+				}, 
+				//If In-Valid User respond 
+				failure: function(){
+					res.redirect('/login');
+				}
+			}
+		);
+	} else res.json({});
+});
+
 /*
 	Get Method not Allowed for authentication
 */
@@ -116,7 +138,6 @@ app.post("/auth", function(req, res){
 
 
 //All URL Patterns Routing
-
 app.get("/", function(req,res){
 	if(null != req.session.name){
 		res.redirect('/home');
@@ -159,6 +180,18 @@ app.get("/dashboard", function(req,res){
 	if(req.session.name == undefined)
 		res.redirect('/login');
 	else res.sendFile(path + req.session.type + '-dashboard.html');
+});
+
+app.get("/utilities", function(req,res){
+	if(req.session.name == undefined)
+		res.redirect('/login');
+	else res.sendFile(path + req.session.type + '-utilities.html');
+});
+
+app.get("/profile", function(req,res){
+	if(req.session.name == undefined)
+		res.redirect('/login');
+	else res.sendFile(path + req.session.type + '-profile.html');
 });
 
 app.get("/logout", function(req,res){

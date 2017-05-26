@@ -43,7 +43,7 @@
 
   <body>
 
-    <div id="wrapper" ng-app="zoneApp" ng-controller="zoneCtrl">
+    <div id="wrapper" ng-app="utilityApp" ng-controller="utilityCtrl">
         <!-- Navigation -->
         <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0;  background-color: #687888;">
 			<div class="navbar-header">
@@ -56,38 +56,35 @@
 		<div id="page-wrapper">
 			<div class="row">
 				<div class="col-lg-12">
-					<h1 class="page-header fonty">Available Rooms</h1>
+					<h1 class="page-header fonty">Utility Setup</h1>
 				</div>
-			</div>
-			<div class="row">
-				<div id="navbar" class="navbar-collapse collapse">
-					<ul class="nav navbar-nav">
-						<li ng-repeat="room in roomlist | orderBy : 'roomId'"  id="{{room.roomId}}">
-							<a href="#" class="calm-color text-big" ng-click="loadRoomUtility(room.roomId)">{{room.title}}</a>
-						</li>
-					</ul>
-				</div>	
+				
 			</div>
 			<div class="row">
 				  <table class="table fonty">
 					<thead>
 					  <tr>
-						<th>Device</th>
+						<th>Utility</th>
+						<th>Plan</th>
+						<th>Current Bill</th>
 						<th>Operation</th>
 					  </tr>
 					</thead>
 					<tbody>
-					  <tr ng-repeat="device in devicelist | orderBy : 'type'" ng-if="device.active">
+					  <tr ng-repeat="utility in utilitylist | orderBy : 'type'" ng-if="utility.active">
 						<td>
-							<span class="">{{device.title}}</span>
+							<span class="">{{utility.title}}</span>
 						</td>
+						<td>
+							<span class="">{{utility.plan}}</span>
+						</td>
+						<td>
+							<span class="">{{utility.currentbill}}</span>
+						</td>						
 						<td>			
 							<label class="toggle">
-								<button class="btn btn-sm btn-success" type="button"  ng-if="device.status">
-									Turn Off
-								</button>
-								<button class="btn btn-sm btn-d" type="button" ng-if="!device.status">
-									Turn On
+								<button class="btn btn-sm btn-success" type="button">
+									Request Service
 								</button>
 							 </label>				 
 						</td>
@@ -113,149 +110,47 @@
   </body>
 </html>
 <script>
-	var zone = angular.module('zoneApp', []);	
-	zone.directive('leftmenu', function($compile) {
+	var utility = angular.module('utilityApp', []);	
+	utility.directive('leftmenu', function($compile) {
 		var directive = {};
 		directive.restrict = 'E';
 		directive.templateUrl = "/resources/templates/resident-left-menu.html";		
 		directive.controller = function($scope, $rootScope, $http) {
-			$scope.zonetab = 'active';			
+			$scope.utilitytab = 'active';			
 		};		
 		return directive;
 	});	
-	zone.controller('zoneCtrl', function($scope, $http) {
+	utility.controller('utilityCtrl', function($scope, $http) {
 		$http.get("/getuser")
 		.then(function(response) {
 			$scope.name = response.data.name;
 		});
-		$scope.roomlist = [
+		$scope.utilitylist = [
 			{
-				roomId: 1,
-				title: 'Hall'
+				id: 1,
+				active: true,
+				title: 'Electricity',
+				plan: '3 Phase, Monthly',
+				currentbill: 'INR 3200.70'
 			},{
-				roomId: 2,
-				title: 'Master Bed'
+				id: 2,
+				active: true,
+				title: 'Gas',
+				plan: 'Indian Flame, Double Cylinder',
+				currentbill: 'INR 800.00'
 			},{
-				roomId: 3,
-				title: 'Kitchen'
+				id: 3,
+				active: true,
+				title: 'Water',
+				plan: '7000 Lt/Day',
+				currentbill: 'INR 500'
 			},{
-				roomId: 4,
-				title: 'Chidren\'s Room'
+				id: 4,
+				active: true,
+				title: 'Internet',
+				plan: '10 mbps Unlimited Download',
+				currentbill: 'INR 2500'
 			}
 		];
-		var selectTab = function(roomId){
-			for(var i = 1; i <= $scope.roomlist.length; i++){
-				$('#' + i).attr('style', '');
-			}
-			$('#'+roomId).attr('style', 'background-color: #eee; color: #235273c');
-		}
-		
-		$scope.loadRoomUtility = function(roomId){
-			selectTab(roomId);
-			switch(roomId){
-				case 1: $scope.devicelist = [
-					{
-						id: 1,
-						active: true,
-						status: true,
-						title: 'Light 1'
-					},{
-						id: 2,
-						active: true,
-						status: true,
-						title: 'Light 2'
-					},{
-						id: 3,
-						active: true,
-						status: false,
-						title: 'AC'
-					},{
-						id: 4,
-						active: true,
-						status: false,
-						title: 'TV'
-					},{
-						id: 5,
-						active: true,
-						status: false,
-						title: 'Music System'
-					},{
-						id: 6,
-						active: true,
-						status: false,
-						title: 'Fan'
-					}
-				]; break;
-				case 2: $scope.devicelist = [
-					{
-						id: 21,
-						active: true,
-						status: true,
-						title: 'Light 1'
-					},{
-						id: 22,
-						active: true,
-						status: false,
-						title: 'Reading Lamp'
-					},{
-						id: 23,
-						active: true,
-						status: true,
-						title: 'AC'
-					},{
-						id: 24,
-						active: true,
-						status: false,
-						title: 'Ambient Lighting'
-					},{
-						id: 25,
-						active: true,
-						status: false,
-						title: 'Music System'
-					}
-				]; break;
-				case 3: $scope.devicelist = [
-					{
-						id: 31,
-						active: true,
-						status: false,
-						title: 'Light'
-					},{
-						id: 32,
-						active: true,
-						status: true,
-						title: 'Exhaust'
-					},{
-						id: 33,
-						active: true,
-						status: false,
-						title: 'Coffee Machine'
-					},{
-						id: 34,
-						active: true,
-						status: false,
-						title: 'Toaster'
-					}
-				]; break;
-				case 4: $scope.devicelist = [
-					{
-						id: 41,
-						active: true,
-						status: false,
-						title: 'Light'
-					},{
-						id: 42,
-						active: true,
-						status: true,
-						title: 'AC'
-					},{
-						id: 33,
-						active: true,
-						status: false,
-						title: 'Fan'
-					}
-				]; break;
-			}
-		}
 	});
 </script>
