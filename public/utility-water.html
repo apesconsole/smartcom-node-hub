@@ -46,14 +46,10 @@
 		width	: 100%;
 		height	: 300px;
 	}
-	#avg-cnsmp-chart {
+	#daily-cnsmp-chart {
 		width	: 100%;
 		height	: 300px;
 	}	
-	#mnthly-chart {
-		width	: 100%;
-		height	: 300px;
-	}
 	#pie-chart {
 		width	: 100%;
 		height	: 300px;
@@ -108,7 +104,8 @@
 									<div>Consumption / Zone</div>
                                     <div>Zone 1: <strong>800 U</strong></div>
 									<div>Zone 2: <strong>200 U</strong></div>
-									<div>Zone 3: <strong>1030 U</strong></div>
+									<div>Zone 3: <strong>530 U</strong></div>
+									<div>Zone 4: <strong>500 U</strong></div>
                                 </div>							
                             </div>
                         </div>
@@ -116,38 +113,28 @@
                 </div>
 			</div>
 			<div class="row">
-                <div class="col-lg-6">
+                <div class="col-lg-12">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Consumption
+                            Daily Consumption
                         </div>
                         <div class="panel-body">
-                            <div id="cnsmp-chart"></div>
+                            <div id="daily-cnsmp-chart"></div>
                         </div>
                     </div>
-                </div>
-                <div class="col-lg-6">
-                    <div class="panel panel-default">
-                        <div class="panel-heading">
-                            Average Consumption / Occupancy
-                        </div>
-                        <div class="panel-body">
-                            <div id="avg-cnsmp-chart"></div>
-                        </div>
-                    </div>
-                </div>				
+                </div>			
 			</div>
 			<div class="row">
                 <div class="col-lg-6">
                     <div class="panel panel-default">
                         <div class="panel-heading">
-                            Monthly Trend
+                            Monthly Consumption
                         </div>
                         <div class="panel-body">
-                            <div id="mnthly-chart"></div>
+                            <div id="cnsmp-chart"></div>
                         </div>
                     </div>
-                </div>
+                </div>				
                 <div class="col-lg-6">
                     <div class="panel panel-default">
                         <div class="panel-heading">
@@ -218,154 +205,129 @@
 			 }
 		});
 	}
-	var displayAvgConsumption = function(){
-		var chart = AmCharts.makeChart( "avg-cnsmp-chart", {
-			"theme": "light",
-			"type": "serial",
-			"dataProvider": [
-				{
-					'_id': 'Zone 1' , value: 2323
-				},{
-					'_id': 'Zone 2' , value: 3454
-				},{
-					'_id': 'Zone 3' , value: 4066
-				},{
-					'_id': 'Zone 4' , value: 1500
-				},{
-					'_id': 'Common' , value: 3212
-				}
-			],
-			"valueAxes": [{
-				"title": "Average Consumption"
-			}],
-			"graphs": [{
-				"balloonText": "Consumption in [[category]] : [[value]]  per Month",
-				"fillAlphas": 1,
-				"lineAlpha": 0.2,
-				"title": "Zone",
-				"type": "column",
-				"valueField": "value"
-			}],
-			"rotate": false,
-			"categoryField": "_id",
-			"categoryAxis": {
-				"gridPosition": "start",
-				"fillAlpha": 0.05,
-				"position": "left",
-			},
-			"export": {
-				"enabled": false
-			 }
-		});
-	}
-	var monthlyTrend = function(){
-		var chart = AmCharts.makeChart("mnthly-chart", {
-			"type": "serial",
-			 "theme": "light",
-			"categoryField": "month",
-			"rotate": true,
-			"startDuration": 1,
-			"categoryAxis": {
-				"gridPosition": "start",
-				"position": "left"
-			},
-			"trendLines": [],
-			"graphs": [
-				{
-					"balloonText": "Zone 1:[[value]]",
-					"fillAlphas": 0.8,
-					"id": "AmGraph-1",
-					"lineAlpha": 0.2,
-					"title": "Zone 1",
-					"type": "column",
-					"valueField": "zone1"
-				}, {
-					"balloonText": "Zone 2:[[value]]",
-					"fillAlphas": 0.8,
-					"id": "AmGraph-2",
-					"lineAlpha": 0.2,
-					"title": "Zone 2",
-					"type": "column",
-					"valueField": "zone2"
-				}, {
-					"balloonText": "Zone 3:[[value]]",
-					"fillAlphas": 0.8,
-					"id": "AmGraph-3",
-					"lineAlpha": 0.2,
-					"title": "Zone 3",
-					"type": "column",
-					"valueField": "zone3"
-				}
-			],
-			"guides": [],
-			"valueAxes": [
-				{
-					"id": "ValueAxis-1",
-					"position": "top",
-					"axisAlpha": 0
-				}
-			],
-			"allLabels": [],
-			"balloon": {},
-			"titles": [],
-			"dataProvider": [
-				{
-					"month": 'Jan',
-					"zone1": 23.5,
-					"zone2": 18.1,
-					"zone3": 23.5
-				},
-				{
-					"month": 'Feb',
-					"zone1": 27.9,
-					"zone2": 23.1,
-					"zone3": 22.5
-				},
-				{
-					"month": 'Mar',
-					"zone1": 33.1,
-					"zone2": 25.4,
-					"zone3": 26.5
-				},
-				{
-					"month": 'Apr',
-					"zone1": 44.4,
-					"zone2": 27.1,
-					"zone3": 29.5
-				}
-			],
-			"export": {
-				"enabled": true
-			 }
-
-		});	
-	}
-	
 	var displayPie = function(){
 		var chart = AmCharts.makeChart( "pie-chart", {
 		  "type": "pie",
 		  "theme": "light",
 		  "dataProvider": [ {
-			"category": "Capacity",
-			"value": 260
+			"category": "D.T. Well",
+			"value": 3.5
 		  }, {
-			"category": "Rainwater",
-			"value": 201
+			"category": "Rain Water",
+			"value": 2.0
 		  }, {
 			"category": "Recycle",
-			"value": 65
+			"value": 1.0
+		  }, {
+			"category": "Corp. Supply",
+			"value": 2.5
 		  } ],
 		  "valueField": "value",
 		  "titleField": "category",
 		  "outlineAlpha": 0.4,
 		  "depth3D": 15,
-		  "balloonText": "[[title]]<br><span style='font-size:14px'><b>[[value]]</b> ([[percents]]%)</span>",
+		  "balloonText": "[[title]]<br><span style='font-size:10px'><b>[[value]]</b> ([[percents]]%)</span>",
 		  "angle": 30,
 		  "export": {
 			"enabled": true
 		  }
 		} );	
 	}	
+	var hourlyTrend = function(){
+		var chart = AmCharts.makeChart("daily-cnsmp-chart", {
+			"theme": "light",
+			"type": "serial",
+			"dataProvider": [{
+				"hour": "6:00 AM",
+				"zone1": 3.3,
+				"zone2": 4.2,
+				"zone3": 3.2,
+				"zone4": 4.5
+			}, {
+				"hour": "9:00 AM",
+				"zone1": 3.8,
+				"zone2": 4.7,
+				"zone3": 4.0,
+				"zone4": 5.3
+			}, {
+				"hour": "12:00 PM",
+				"zone1": 4.2,
+				"zone2": 4.6,
+				"zone3": 3.9,
+				"zone4": 4.7
+			}, {
+				"hour": "3:00 PM",
+				"zone1": 3.4,
+				"zone2": 3.0,
+				"zone3": 2.8,
+				"zone4": 3.5
+			}, {
+				"hour": "6:00 PM",
+				"zone1": 2.3,
+				"zone2": 2.6,
+				"zone3": 2.7,
+				"zone4": 3.4
+			}, {
+				"hour": "9:00 PM",
+				"zone1": 2.0,
+				"zone2": 1.6,
+				"zone3": 1.9,
+				"zone4": 2.3
+			}, {
+				"hour": "00:00 AM",
+				"zone1": 0.2,
+				"zone2": 0.1,
+				"zone3": 0.2,
+				"zone4": 0.4
+			}],
+			"valueAxes": [{
+				"unit": "%",
+				"position": "left",
+				"title": "Water Usage",
+			}],
+			"startDuration": 1,
+			"graphs": [{
+				"balloonText": "Usage at [[category]] in Zone 1: <b>[[value]]</b>",
+				"fillAlphas": 0.9,
+				"lineAlpha": 0.2,
+				"title": "Zone 1",
+				"type": "column",
+				"valueField": "zone1"
+			}, {
+				"balloonText": "Usage at [[category]] in Zone 2: <b>[[value]]</b>",
+				"fillAlphas": 0.9,
+				"lineAlpha": 0.2,
+				"title": "Zone 1",
+				"type": "column",
+				"valueField": "zone2"
+			}, {
+				"balloonText": "Usage at [[category]] in Zone 3: <b>[[value]]</b>",
+				"fillAlphas": 0.9,
+				"lineAlpha": 0.2,
+				"title": "Zone 1",
+				"type": "column",
+				"valueField": "zone3"
+			}, {
+				"balloonText": "Usage at [[category]] in Zone 4: <b>[[value]]</b>",
+				"fillAlphas": 0.9,
+				"lineAlpha": 0.2,
+				"title": "Zone 4",
+				"type": "column",
+				"valueField": "zone4"
+			}],
+			"plotAreaFillAlphas": 0.1,
+			"categoryField": "hour",
+			"categoryAxis": {
+				"gridPosition": "start"
+			},
+			"export": {
+				"enabled": true
+			 }
+
+		});
+	}
+	
+	
 	home.directive('leftmenu', function($compile) {
 		var directive = {};
 		directive.restrict = 'E';
@@ -379,9 +341,8 @@
 		$http.get("/getuser")
 		.then(function(response) {
 			$scope.name = response.data.name;
+			hourlyTrend();
 			displayConsumption();
-			displayAvgConsumption();
-			monthlyTrend();
 			displayPie();
 		});	
 	});
