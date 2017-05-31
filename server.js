@@ -123,7 +123,8 @@ app.post("/auth", function(req, res){
 					req.session.userId = userInfo.userId;
 					req.session.name = userInfo.name;
 					req.session.type = userInfo.type;
-					res.redirect('/' + userInfo.homeUrl);
+					req.session.homeUrl = userInfo.homeUrl;
+					res.redirect('/' + req.session.homeUrl);
 				}, 
 				//If In-Valid User Call 
 				failure: function(){
@@ -140,7 +141,7 @@ app.post("/auth", function(req, res){
 //All URL Patterns Routing
 app.get("/", function(req,res){
 	if(null != req.session.name){
-		res.redirect('/home');
+		res.redirect('/' + req.session.homeUrl);
 	} else {
 		res.redirect('/login');
 	}

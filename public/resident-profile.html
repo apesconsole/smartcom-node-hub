@@ -37,6 +37,13 @@
 			width: 40px;
 			height: 40px;
 			color: green;
+		}	
+		.odd {
+		  background-color: #eee;
+		  height: 10px;
+		}
+		.even {
+		  background-color: white;
 		}		
 	</style>	
   </head>
@@ -70,7 +77,7 @@
 					  </tr>
 					</thead>
 					<tbody>
-					  <tr ng-repeat="profile in profilelist">
+					  <tr ng-repeat="profile in profilelist" ng-class-odd="'odd'" ng-class-even="'even'">
 						<td>
 							<span class="">{{profile.name}}</span>
 						</td>
@@ -140,7 +147,7 @@
 				id: 1,
 				active: true,
 				status: true,
-				name: 'Kasturi Bhattacharjee'
+				name: 'Primary User'
 			},{
 				id: 2,
 				active: false,

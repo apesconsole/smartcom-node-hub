@@ -37,6 +37,13 @@
 			width: 40px;
 			height: 40px;
 			color: green;
+		}	
+		.odd {
+		  background-color: #eee;
+		  height: 10px;
+		}
+		.even {
+		  background-color: white;
 		}		
 	</style>	
   </head>
@@ -71,7 +78,7 @@
 					  </tr>
 					</thead>
 					<tbody>
-					  <tr ng-repeat="utility in utilitylist | orderBy : 'type'" ng-if="utility.active">
+					  <tr ng-repeat="utility in utilitylist | orderBy : 'type'" ng-if="utility.active" ng-class-odd="'odd'" ng-class-even="'even'">
 						<td>
 							<span class="">{{utility.title}}</span>
 						</td>
