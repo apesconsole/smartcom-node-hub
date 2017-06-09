@@ -25,6 +25,7 @@ app.use(cookieParser());
 //MongoDB Connection Details
 var cloudMonGoDBConfig = {
 	mongoUsr		: process.env.MONGODB_USR 			|| 'mongodb://admin:admin@ds113630.mlab.com:13630/smartcom_user',
+	mongoIntrstLog	: process.env.MONGODB_INTRST_LOG 	|| 'mongodb://admin:admin@ds053136.mlab.com:53136/interestlogger',
 	mongoSession	: process.env.MONGODB_SESSION_URL 	|| 'mongodb://admin:admin@ds153521.mlab.com:53521/smartcom_session' 
 }
 var mongoose = require('mongoose');
@@ -55,6 +56,17 @@ var userValidatoin = function(user, callBackMethods){
 	});
 }
 
+var processInterestLogs = function(criteria, callBackMethods){
+	MongoClient.connect(cloudMonGoDBConfig.mongoIntrstLog, function(err, db) {
+		db.collection('LOGS').aggregate( criteria ).toArray(function(err, result) {
+			db.close();
+			if (err) 
+				callBackMethods.failure();
+			else
+				callBackMethods.success(result)
+		});
+	});			
+}
 
 router.use(function (req, res, next) {
 	var headers = req.headers;
@@ -137,6 +149,26 @@ app.post("/auth", function(req, res){
 	}
 });	
 
+app.get("/loadchart", function(req,res){
+	if(req.session.userId != undefined){
+	    processInterestLogs( [{ 
+			     $group : { 
+					"_id" : "$productId", 
+				    "count" : {  
+						$sum : 1  
+					} 
+				}	
+			}] , { 
+				success: function(chart){
+					res.json(chart);
+				}, 
+				failure: function(){
+					res.json({});
+				}
+			}
+		);
+	} else res.json({});
+});
 
 //All URL Patterns Routing
 app.get("/", function(req,res){
@@ -193,6 +225,13 @@ app.get("/profile", function(req,res){
 	if(req.session.name == undefined)
 		res.redirect('/login');
 	else res.sendFile(path + req.session.type + '-profile.html');
+});
+
+
+app.get("/retail", function(req,res){
+	if(req.session.name == undefined)
+		res.redirect('/login');
+	else res.sendFile(path + req.session.type + '-dashboard.html');
 });
 
 app.get("/logout", function(req,res){
