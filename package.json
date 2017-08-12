@@ -5,6 +5,15 @@
     "start": "node server.js"
   },
   "dependencies": {
-    "express": "latest"
+    "express": "latest",
+	"http": "latest",
+	"url": "latest",
+	"ejs": "latest",
+	"mongoose": "latest",
+	"body-parser": "latest",
+	"cookie-parser": "latest",
+	"express-session": "latest",
+	"connect-mongo": "latest",
+	"express": "latest"
   }
 }
