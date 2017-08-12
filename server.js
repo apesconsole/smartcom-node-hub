@@ -2,6 +2,7 @@
 	Apes's Console
 */
 
+<<<<<<< HEAD
 var express  = require("express");
 var app 	 = express();
 var http 	 = require('http').Server(app);
@@ -10,6 +11,14 @@ var logger	 = require("logging_component");
 var url 	 = require("url");
 var ejs 	 = require('ejs');
 var mongoose = require('mongoose');
+=======
+var express = require("express");
+var app = express();
+var http = require('http').Server(app);
+var router = express.Router();
+var logger = require("logging_component");
+var url = require("url");
+>>>>>>> f52313ee9e9e28de6d72ffd69d92b20a73df9bea
 
 /*
 	Cloud MongoDB Based Security & Operations
@@ -24,9 +33,20 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 //MongoDB Connection Details
+<<<<<<< HEAD
 var config = require('./app/models/config'); // get our config file
 
 mongoose.connect(config.mongoSession);
+=======
+var cloudMonGoDBConfig = {
+	mongoUsr		: process.env.MONGODB_USR 			|| 'mongodb://admin:admin@ds113630.mlab.com:13630/smartcom_user',
+	mongoTrffcDta	: process.env.MONGODB_TRAFFIC_DTA 	|| 'mongodb://admin:admin@ds121222.mlab.com:21222/trafficdata',
+	mongoIntrstLog	: process.env.MONGODB_INTRST_LOG 	|| 'mongodb://admin:admin@ds053136.mlab.com:53136/interestlogger',
+	mongoSession	: process.env.MONGODB_SESSION_URL 	|| 'mongodb://admin:admin@ds153521.mlab.com:53521/smartcom_session' 
+}
+var mongoose = require('mongoose');
+mongoose.connect(cloudMonGoDBConfig.mongoSession);
+>>>>>>> f52313ee9e9e28de6d72ffd69d92b20a73df9bea
 var sessionStore = new MongoStore({mongooseConnection: mongoose.connection });
 	
 app.use(session({
@@ -56,10 +76,258 @@ app.use('/resources', express.static(path + 'resources'));
 app.set('views', path);
 app.use("/", router);
 
+<<<<<<< HEAD
+=======
+
+var userValidatoin = function(user, callBackMethods){
+	MongoClient.connect(cloudMonGoDBConfig.mongoUsr, function(err, db) {
+		db.collection('USERS').findOne( user, function(err, result) {
+			db.close();
+			if (err || null == result || null == result.userId) 
+				callBackMethods.failure();
+			else
+				callBackMethods.success(result)
+		});
+	});
+}
+
+var processInterestLogs = function(criteria, callBackMethods){
+	MongoClient.connect(cloudMonGoDBConfig.mongoIntrstLog, function(err, db) {
+		db.collection('LOGS').aggregate( criteria ).toArray(function(err, result) {
+			db.close();
+			if (err) 
+				callBackMethods.failure();
+			else
+				callBackMethods.success(result)
+		});
+	});			
+}
+
+var loadTrafficData = function(criteria, callBackMethods){
+	MongoClient.connect(cloudMonGoDBConfig.mongoTrffcDta, function(err, db) {
+		db.collection('TRAFFIC_DATA_SET').find( criteria.query ).skip(eval(criteria.skip)).limit(eval(criteria.limit)).toArray(function(err, result) {
+			db.close();
+			if (err) 
+				callBackMethods.failure();
+			else
+				callBackMethods.success(result)
+		});
+	});		
+}
+
+var loadProcessedData = function(criteria, colName, callBackMethods){
+	MongoClient.connect(cloudMonGoDBConfig.mongoTrffcDta, function(err, db) {
+		db.collection(colName).find( criteria).toArray(function(err, result) {
+			db.close();
+			if (err) 
+				callBackMethods.failure();
+			else
+				callBackMethods.success(result)
+		});
+	});	
+}
+
+var insertData = function(data, colName, callBackMethods){
+	MongoClient.connect(cloudMonGoDBConfig.mongoTrffcDta, function(err, db) {
+		db.collection(colName).insert(data, function(err, result) {
+			db.close();
+			callBackMethods();
+		});
+	});
+}
+
+var consolidateMonthlyData = function(monthList, index){
+	if(index >= monthList.length) return;
+	var criteria = [{
+		$match: {
+			violationMonth: monthList[index]['_id'].month
+		}	
+		},{
+        $group : {
+           _id : { carMake: "$carMake" },
+           total: { $sum: 1 }
+        }
+      }];
+
+	MongoClient.connect(cloudMonGoDBConfig.mongoTrffcDta, function(err, db) {
+		db.collection('TRAFFIC_DATA_SET').aggregate( criteria ).toArray(function(err, result) {
+			db.close();
+			console.log(monthList[index]['_id'].month + '-->' + JSON.stringify(result));
+			var carList = [];
+			for(var i=0; i< result.length; i++){
+				carList[carList.length] = {
+					carMake         : result[i]['_id']['carMake'],
+					totalViolations : result[i]['total']
+				}
+			}
+			var data = {
+				month: monthList[index]['_id'].month,
+				totalPerMonth: monthList[index]['total'],
+				monthlyDataPerCar: carList,
+			};
+	    	insertData(data, 'AGGREGATE_BY_MONTH_SET', function(){
+				consolidateMonthlyData(monthList, ++index);
+	    	});
+		});
+	});	
+}
+
+var consolidateByTypeData = function(typeList, index){
+	if(index >= typeList.length) return;
+	var criteria = [{
+		$match: {
+			carMake: typeList[index]['_id'].type
+		}	
+		},{
+        $group : {
+           _id : { month: "$violationMonth" },
+           total: { $sum: 1 }
+        }
+      }];
+
+	MongoClient.connect(cloudMonGoDBConfig.mongoTrffcDta, function(err, db) {
+		db.collection('TRAFFIC_DATA_SET').aggregate( criteria ).toArray(function(err, result) {
+			db.close();
+			console.log(typeList[index]['_id'].type + '-->' + JSON.stringify(result));
+			var monthList = [];
+			for(var i=0; i< result.length; i++){
+				monthList[monthList.length] = {
+					violationMonth  : result[i]['_id']['month'],
+					totalViolations : result[i]['total']
+				}
+			}
+			var data = {
+				carMake: typeList[index]['_id'].type,
+				totalPerCar: typeList[index]['total'],
+				monthlyDataPerCar: monthList,
+			};
+	    	insertData(data, 'AGGREGATE_BY_TYPE_SET', function(){
+				consolidateByTypeData(typeList, ++index);
+	    	});
+		});
+	});	
+}
+
+var aggregateMonthData = function(){
+	var criteria = [{
+        $group : {
+           _id : { month: "$violationMonth" },
+           total: { $sum: 1 }
+        }
+      }];
+
+	MongoClient.connect(cloudMonGoDBConfig.mongoTrffcDta, function(err, db) {
+		db.collection('TRAFFIC_DATA_SET').aggregate( criteria ).toArray(function(err, result) {
+			db.close();
+			console.log(JSON.stringify(result));
+			consolidateMonthlyData(result, 0);
+		});
+	});		
+}
+
+var aggregateTypeData = function(){
+
+	var criteria = [{
+        $group : {
+           _id : { type: "$carMake" },
+           total: { $sum: 1 }
+        }
+      }];
+
+	MongoClient.connect(cloudMonGoDBConfig.mongoTrffcDta, function(err, db) {
+		db.collection('TRAFFIC_DATA_SET').aggregate( criteria ).toArray(function(err, result) {
+			db.close();
+			console.log(result.length);
+			consolidateByTypeData(result, 0);
+		});
+	});		
+}
+
+var getMaxType = function (arr, prop) {
+    var max;
+    for (var i=0 ; i<arr.length ; i++) {
+        if (!max || parseInt(arr[i][prop]) > parseInt(max.count))
+	        max = {
+	        	type : arr[i].carMake,
+	        	count: arr[i].totalViolations
+	        };
+    }
+    return max;
+}
+var getMinType = function (arr, prop) {
+    var min;
+    for (var i=0 ; i<arr.length ; i++) {
+        if (!min || parseInt(arr[i][prop]) < parseInt(min.count))
+	        min = {
+	        	type : arr[i].carMake,
+	        	count: arr[i].totalViolations
+	        };
+    }
+    return min;
+}
+
+var aggregateMaxPerMonthData = function(){
+	MongoClient.connect(cloudMonGoDBConfig.mongoTrffcDta, function(err, db) {
+		db.collection('AGGREGATE_BY_MONTH_SET').find( ).toArray(function(err, result) {
+			db.close();
+			var cleanData = [];
+			for (var i=0 ; i<result.length ; i++) {
+				var max = getMaxType(result[i].monthlyDataPerCar, 'totalViolations');
+				var min = getMinType(result[i].monthlyDataPerCar, 'totalViolations');
+				cleanData[cleanData.length] = {
+					month: result[i].month,
+					totalPerMonth: result[i].totalPerMonth,
+					maxType: max.type,
+					maxCount: max.count,
+					minType: min.type,
+					minCount: min.count
+				};
+			}
+			insertData(cleanData, 'FINALIZED_DATA_SET', function(){
+			console.log('Complete !!!');
+			});
+		});
+	});	
+}
+
+>>>>>>> f52313ee9e9e28de6d72ffd69d92b20a73df9bea
 router.use(function (req, res, next) {
 	next();
 });
 
+<<<<<<< HEAD
+=======
+
+app.get("/getuser", function(req,res){
+	logger.log('req.session.userId = '+ req.session.userId);
+	if(req.session.userId != undefined)
+		res.json({'name': req.session.name});
+	else res.json({});
+});
+
+app.get("/getuserprofile", function(req,res){
+	logger.log('req.session.userId = '+ req.session.userId);
+	if(req.session.userId != undefined){
+		userValidatoin( {
+		        //User Entered Information
+				userId: req.session.userId, 
+				name: req.session.name,
+				type: req.session.type
+			}, { 
+				//If Valid User respond
+				success: function(userInfo){
+					res.json(userInfo);
+				}, 
+				//If In-Valid User respond 
+				failure: function(){
+					res.redirect('/login');
+				}
+			}
+		);
+	} else res.json({});
+});
+
+>>>>>>> f52313ee9e9e28de6d72ffd69d92b20a73df9bea
 /*
 	Get Method not Allowed for authentication
 */
@@ -146,6 +414,7 @@ router.post("/adduser", function(req, res){
 	}
 });
 
+<<<<<<< HEAD
 router.post("/edituser", function(req, res){
 	let userId = req.body.userId || req.query.userId;
 	if(req.session.userData != undefined){
@@ -178,6 +447,50 @@ router.post("/edituser", function(req, res){
 		} else {
 			res.render(path + req.session.userData.type + '-useradmin.html', {message: 'User Id Cannot be blank'});
 		}
+=======
+app.get("/loadtrafficdata", function(req,res){
+	if(req.session.userId != undefined){
+		var url_parts = url.parse(req.url, true);
+		var queryParam = url_parts.query;
+	    loadTrafficData( {
+				query: {},
+				limit: queryParam.limit,
+				skip: queryParam.skip
+			}, { 
+				success: function(data){
+					logger.log(data.length);
+					res.json(data);
+				}, 
+				failure: function(){
+					res.json({});
+				}
+			}
+		);
+	} else res.json({});
+});
+
+app.get("/getmonthlydata", function(req,res){
+	if(req.session.userId != undefined){
+		var url_parts = url.parse(req.url, true);
+		var queryParam = url_parts.query;
+	    loadProcessedData({},'FINALIZED_DATA_SET', { 
+				success: function(data){
+					logger.log(data.length);
+					res.json(data);
+				}, 
+				failure: function(){
+					res.json({});
+				}
+			}
+		);
+	} else res.json({});
+});
+
+//All URL Patterns Routing
+app.get("/", function(req,res){
+	if(null != req.session.name){
+		res.redirect('/' + req.session.homeUrl);
+>>>>>>> f52313ee9e9e28de6d72ffd69d92b20a73df9bea
 	} else {
 		res.render('login.html', {message: 'Session Expired. Please Login Again.'});
 	}
@@ -392,6 +705,7 @@ router.get("/construction", function(req,res){
 	else res.sendFile(path + req.session.userData.type + '-dashboard.html');
 });
 
+<<<<<<< HEAD
 router.get("/user-admin", function(req,res){
 	if(req.session.userData == undefined)
 		res.redirect('/login');
@@ -400,14 +714,40 @@ router.get("/user-admin", function(req,res){
 
 router.get("/project-management", function(req,res){
 	if(req.session.userData == undefined)
+=======
+app.get("/retail", function(req,res){
+	if(req.session.name == undefined)
+>>>>>>> f52313ee9e9e28de6d72ffd69d92b20a73df9bea
 		res.redirect('/login');
 	else res.render(path + req.session.userData.type + '-projectadmin.html', {message: ''});
 });
 
+<<<<<<< HEAD
 router.get("/logout", function(req,res){
 	res.redirect('/login');
 });
 
+=======
+app.get("/transport", function(req,res){
+	if(req.session.name == undefined)
+		res.redirect('/login');
+	else res.sendFile(path + req.session.type + '-dashboard.html');
+});
+
+
+app.get("/process", function(req,res){
+	//aggregateTypeData();
+	//aggregateMonthData();
+	//aggregateMaxPerMonthData();
+	res.redirect('/login');
+});
+
+
+app.get("/logout", function(req,res){
+	res.redirect('/login');
+});
+
+>>>>>>> f52313ee9e9e28de6d72ffd69d92b20a73df9bea
 http.listen(process.env.PORT || 3001, () => {				
 	logger.log('##################################################');
 	logger.log('        Smart City - NODE - HUB | Cloud');
