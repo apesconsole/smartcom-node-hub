@@ -2,13 +2,14 @@
 	Apes's Console
 */
 
-var express = require("express");
-var app = express();
-var http = require('http').Server(app);
-var router = express.Router();
-var logger = require("logging_component");
-var url = require("url");
-var mqtt = require('mqtt');
+var express  = require("express");
+var app 	 = express();
+var http 	 = require('http').Server(app);
+var router 	 = express.Router();
+var logger	 = require("logging_component");
+var url 	 = require("url");
+var ejs 	 = require('ejs');
+var mongoose = require('mongoose');
 
 /*
 	Cloud MongoDB Based Security & Operations
@@ -17,19 +18,15 @@ var bodyParser   = require('body-parser');
 var cookieParser = require('cookie-parser');
 var session      = require('express-session');
 var MongoStore   = require('connect-mongo')(session);
-var MongoClient  = require('mongodb').MongoClient;
+
 app.use(bodyParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(cookieParser());
 //MongoDB Connection Details
-var cloudMonGoDBConfig = {
-	mongoUsr		: process.env.MONGODB_USR 			|| 'mongodb://admin:admin@ds113630.mlab.com:13630/smartcom_user',
-	mongoIntrstLog	: process.env.MONGODB_INTRST_LOG 	|| 'mongodb://admin:admin@ds053136.mlab.com:53136/interestlogger',
-	mongoSession	: process.env.MONGODB_SESSION_URL 	|| 'mongodb://admin:admin@ds153521.mlab.com:53521/smartcom_session' 
-}
-var mongoose = require('mongoose');
-mongoose.connect(cloudMonGoDBConfig.mongoSession);
+var config = require('./app/models/config'); // get our config file
+
+mongoose.connect(config.mongoSession);
 var sessionStore = new MongoStore({mongooseConnection: mongoose.connection });
 	
 app.use(session({
@@ -39,205 +36,377 @@ app.use(session({
     store: sessionStore
 }));
 
+//Schema Mapping
+var user                = require('./app/models/user');
+var menu                = require('./app/models/menu');
+var userPermissions     = require('./app/models/userPermissions');
+var project 	        = require('./app/models/project');
+var cnstrntSiteUserMap  = require('./app/models/cnstrntSiteUserMap');      
+var globalInventory     = require('./app/models/globalInventory');
+var inventoryConfig     = require('./app/models/inventoryConfig');
+var cnstrntSite         = require('./app/models/cnstrntSite');		   
+var siteInventory       = require('./app/models/siteInventory');	  
+var siteLabour          = require('./app/models/siteLabour');	
+
 var path = __dirname + '/public/';
+app.set('view engine', 'html');
+
+app.engine('html', ejs.renderFile);
 app.use('/resources', express.static(path + 'resources'));
+app.set('views', path);
 app.use("/", router);
 
-
-var userValidatoin = function(user, callBackMethods){
-	MongoClient.connect(cloudMonGoDBConfig.mongoUsr, function(err, db) {
-		db.collection('USERS').findOne( user, function(err, result) {
-			db.close();
-			if (err || null == result || null == result.userId) 
-				callBackMethods.failure();
-			else
-				callBackMethods.success(result)
-		});
-	});
-}
-
-var processInterestLogs = function(criteria, callBackMethods){
-	MongoClient.connect(cloudMonGoDBConfig.mongoIntrstLog, function(err, db) {
-		db.collection('LOGS').aggregate( criteria ).toArray(function(err, result) {
-			db.close();
-			if (err) 
-				callBackMethods.failure();
-			else
-				callBackMethods.success(result)
-		});
-	});			
-}
-
 router.use(function (req, res, next) {
-	var headers = req.headers;
-	var userAgent = headers['user-agent'];
-	logger.log('User Agent - ' + userAgent + ', Request - ' + req.method);
-	res.header("Access-Control-Allow-Origin", "*");
-	res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
 	next();
-});
-
-var validate = function(req,res){
-    var data = {status: false};
-	var url_parts = url.parse(req.url, true);
-	var query = url_parts.query;	
-	if(query.id == bridge.bridgeid && query.key == bridge.key){
-		data.status = true;
-	}
-	return data;
-}
-
-app.get("/getuser", function(req,res){
-	logger.log('req.session.userId = '+ req.session.userId);
-	if(req.session.userId != undefined)
-		res.json({'name': req.session.name});
-	else res.json({});
-});
-
-app.get("/getuserprofile", function(req,res){
-	logger.log('req.session.userId = '+ req.session.userId);
-	if(req.session.userId != undefined){
-		userValidatoin( {
-		        //User Entered Information
-				userId: req.session.userId, 
-				name: req.session.name,
-				type: req.session.type
-			}, { 
-				//If Valid User respond
-				success: function(userInfo){
-					res.json(userInfo);
-				}, 
-				//If In-Valid User respond 
-				failure: function(){
-					res.redirect('/login');
-				}
-			}
-		);
-	} else res.json({});
 });
 
 /*
 	Get Method not Allowed for authentication
 */
-app.get("/auth", function(req, res){
+router.get("/authenticate", function(req, res){
 	res.redirect('/login');
 });
 
-app.post("/auth", function(req, res){
-	if(null != req.body.userId && null != req.body.password && '' != req.body.userId && '' != req.body.password){
-	    userValidatoin( {
-		        //User Entered Information
-				userId: req.body.userId, 
-				password:req.body.password
-			}, { 
-				//If Valid User Call 
-				success: function(userInfo){
-					req.session.userId = userInfo.userId;
-					req.session.name = userInfo.name;
-					req.session.type = userInfo.type;
-					req.session.homeUrl = userInfo.homeUrl;
-					res.redirect('/' + req.session.homeUrl);
-				}, 
-				//If In-Valid User Call 
-				failure: function(){
-					res.redirect('/login');
+router.post("/authenticate", function(req, res){
+	let userId = req.body.userId || req.query.userId;
+	let password = req.body.password || req.query.password;
+	if(undefined != userId && undefined != password && '' != userId && '' != password){
+		user.findOne({userId: userId}, function(err, userData) {
+			if (!userData) {
+			  res.render('login.html', {message: 'User not found'});
+			} else {
+				if (userData.password != password) {
+					res.render('login.html', {message: 'Invalid Password'});
+				} else if(!userData.active){
+					res.render('login.html', {message: 'Incative User. Please contact Admin'});
+				} else {
+					userData.password = '';
+					req.session.userData = userData;
+					console.log(req.session.userData.homeUrl);
+					res.redirect('/' + userData.homeUrl);
 				}
 			}
-		);
+		});	
 	} else {
-		res.redirect('/login');
+		res.render('login.html', {message: 'User Id/Password cannot be blank'});
 	}
 });	
 
-app.get("/loadchart", function(req,res){
-	if(req.session.userId != undefined){
-	    processInterestLogs( [{ 
-			     $group : { 
-					"_id" : "$productId", 
-				    "count" : {  
-						$sum : 1  
-					} 
-				}	
-			}] , { 
-				success: function(chart){
-					res.json(chart);
-				}, 
-				failure: function(){
-					res.json({});
-				}
-			}
-		);
-	} else res.json({});
+router.get("/getuser", function(req,res){
+	if(req.session.userData != undefined && req.session.userData.userId != undefined){
+		if(req.session.userMenu == undefined){
+			menu.find({userId: req.session.userData.userId, web: true}, function(err, userMenu) {
+				req.session.userMenu = userMenu;
+				res.json({ success: true, userData: req.session.userData, userMenu: userMenu});
+			});
+		} else {
+			res.json({ success: true, userData: req.session.userData, userMenu: req.session.userMenu});
+		}
+	} else res.json({success: false, operation: false, message: 'Session Expired. Please login again'});
 });
+
+//Start - USERS
+router.get("/getusers", function(req,res){
+	if(req.session.userData != undefined){
+		user.find({}, function(err, users) {
+			res.json({ success: true, users: users});
+		});
+	} else res.json({success: false, operation: false, message: 'Session Expired. Please login again'});
+});
+
+router.post("/adduser", function(req, res){
+	let userId = req.body.userId || req.query.userId;
+	console.log(userId);
+	if(req.session.userData != undefined){
+		if(null != userId && '' != userId){
+			user.findOne({userId: userId}, function(err, userData) {
+				if (!userData) {
+				   let newUser = new user({ 
+						userId: userId,
+						password: req.body.password || req.query.password, 
+						name: req.body.name || req.query.name,
+						emailId: req.body.emailId || req.query.emailId,
+						type: 'construction',
+						homeUrl: 'construction',
+						changePwd: true,
+						active: req.body.active || req.query.active
+					});
+					newUser.save(function(err2){
+						res.render(path + req.session.userData.type + '-useradmin.html', {message: 'User Created'});
+					});
+				} else {
+					res.render(path + req.session.userData.type + '-useradmin.html', {message: 'User Id already in use. Please select a unique User Id'});
+				}
+			});	
+		} else {
+			res.render(path + req.session.userData.type + '-useradmin.html', {message: 'User Id Cannot be blank'});
+		}
+	} else {
+		res.render('login.html', {message: 'Session Expired. Please Login Again'});
+	}
+});
+
+router.post("/edituser", function(req, res){
+	let userId = req.body.userId || req.query.userId;
+	if(req.session.userData != undefined){
+		if(undefined != userId && '' != userId){
+			user.findOne({userId: userId}, function(err, userData) {
+				if (userData) {
+					let name = req.body.name || req.query.name;
+					let emailId = req.body.emailId || req.query.emailId;
+					let active = req.body.active || req.query.active;
+					let changePwd = req.body.changePwd || req.query.changePwd;
+					if(undefined != name && null != name && '' != name){
+						userData.name = name;
+					}
+					if(undefined != emailId && null != emailId && '' != emailId){
+						userData.emailId = emailId;
+					}
+					if(undefined != active && null != active && '' != active){
+						userData.active = active;
+					}
+					if(undefined != changePwd && null != changePwd && '' != changePwd){
+						userData.changePwd = changePwd;
+					}
+					userData.save(function(err2){
+						res.render(path + req.session.userData.type + '-useradmin.html', {message: 'User Data Updated'});
+					});
+				} else {
+					res.render(path + req.session.userData.type + '-useradmin.html', {message: 'User Not Found'});
+				}
+			});	
+		} else {
+			res.render(path + req.session.userData.type + '-useradmin.html', {message: 'User Id Cannot be blank'});
+		}
+	} else {
+		res.render('login.html', {message: 'Session Expired. Please Login Again.'});
+	}
+});
+
+router.get("/getuserpermisiosns", function(req,res){
+	if(req.session.userData != undefined){
+		let userId = req.body.userId || req.query.userId;
+		userPermissions.find({}, function(err, permissions) {
+			menu.find({userId: userId}, function(err, userMenu) {
+				let permissionList = [];
+				permissions.forEach(function(_p){
+					let modPer = {
+						type: _p.type,
+						title: _p.title,
+						component: _p.component,
+						web: _p.web,
+						app: _p.app,
+						selected: false
+					}
+					if(userMenu)
+						userMenu.forEach(function(_up){
+							if(_up.component == _p.component){
+								modPer.selected = true;
+							}
+						});
+					permissionList[permissionList.length] = modPer;
+				});
+				res.json({success: true, operation: true, permissions: permissionList});
+			});
+		});
+	} else res.json({success: false, operation: false, message: 'Session Expired. Please login again'});
+});
+
+router.post("/editpermissions", function(req, res){
+	let userId = req.body.userId || req.query.userId;
+	if(req.session.userData != undefined){
+		if(undefined != userId && '' != userId){
+			let components = req.body.component || req.query.component;
+			menu.find({userId: userId}, function(err, userMenu) {
+				if (userMenu) {
+					userPermissions.find({}, function(err, permissions) {
+						userMenu.forEach(function(_oup){
+							//Delete all existing roles
+							_oup.remove();
+						});
+						permissions.forEach(function(_p){
+							components.forEach(function(cmpId){
+								if(_p.component == cmpId){
+									let newRole = new menu({
+										userId: userId, 
+										title: _p.title, 
+										component: _p.component,
+										icon: _p.icon,
+										app: _p.app,
+										web: _p.web
+									});
+									newRole.save(function(e){
+									  //Save Role
+									});
+								}
+							});
+						});
+						res.render(path + req.session.userData.type + '-useradmin.html', {message: 'User Data Updated'});
+					});
+				} else {
+					res.render(path + req.session.userData.type + '-useradmin.html', {message: 'User Not Found'});
+				}
+			});	
+		} else {
+			res.render(path + req.session.userData.type + '-useradmin.html', {message: 'User Id Cannot be blank'});
+		}
+	} else {
+		res.render('login.html', {message: 'Session Expired. Please Login Again.'});
+	}
+});
+
+router.post("/changepassword", function(req, res){
+	let userId = req.body.userId || req.query.userId;
+	if(req.session.userData != undefined){
+		if(null != userId && '' != userId){
+			user.findOne({userId: userId}, function(err, userData) {
+				if (userData) {
+					if(userData.active){
+						let oldpassword = req.body.oldpassword || req.query.oldpassword;
+						let newpassword = req.body.newpassword || req.query.newpassword;
+						if(undefined != oldpassword && null != oldpassword && '' != oldpassword){
+							if(undefined != newpassword && null != newpassword && '' != newpassword){
+								if(oldpassword == newpassword)
+									res.render(path + req.session.userData.type + '-useradmin.html', {message: 'Old and New Passwords cannot be same'});
+								else {
+									userData.password = newpassword;
+									userData.changePwd = false;
+									newUser.save(function(err2){
+										res.render(path + req.session.userData.type + '-useradmin.html', {message: 'Password Changed'});
+									});
+								}
+							}
+						}
+					} else {
+						res.render(path + req.session.userData.type + '-useradmin.html', {message: 'User is In-Active. Passwords cannot be reset for In-Active Users'});
+					}
+				} else {
+					res.render(path + req.session.userData.type + '-useradmin.html', {message: 'User Not Found'});
+				}
+			});	
+		} else {
+			res.render(path + req.session.userData.type + '-useradmin.html', {message: 'User Id Cannot be blank'});
+		}
+	} else {
+		res.render('login.html', {message: 'Session Expired. Please Login Again.'});
+	}
+});
+//End - USERS
+
+//Start - PROJECTS
+router.get("/getprojects", function(req,res){
+	if(req.session.userData != undefined){
+		project.find({}, function(err, projects) {
+			res.json({ success: true, projects: projects});
+		});
+	} else res.json({success: false, operation: false, message: 'Session Expired. Please login again'});
+});
+
+router.get("/getsites", function(req,res){
+	if(req.session.userData != undefined){
+		let projectId = req.body.projectId || req.query.projectId;
+		cnstrntSite.find({projectId: projectId}, function(err, sites) {
+			res.json({ success: true, sites: sites});
+		});
+	} else res.json({success: false, operation: false, message: 'Session Expired. Please login again'});
+});
+
+router.get("/getassignedusers", function(req,res){
+	if(req.session.userData != undefined){
+		let siteId = req.body.siteId || req.query.siteId;
+		user.find({}, function(err, users) {
+			cnstrntSiteUserMap.find({siteId: siteId}, function(err, assignedUser) {
+				let assigneduserlist = [];
+				let unassigneduserlist = [];
+				users.forEach(function(_uu){
+					let assigned = false;
+					assignedUser.forEach(function(_au){
+						if(_uu.userId == _au.userId){
+							assigned = true;
+							assigneduserlist[assigneduserlist.length] = {
+									userId: _au.userId,
+									name: _uu.name,
+									siteId: _au.siteId,
+									edit: _au.edit,
+									viewFinance: _au.viewFinance,
+									export: _au.export,
+									approve: _au.approve,
+									createOrder: _au.createOrder,
+									createBill: _au.createBill,
+									receive: _au.receive,
+									pay: _au.pay,
+									notification: {
+										active: _au.active,
+										task_add_info: _au.task_add_info,
+										task_edit_info: _au.task_edit_info,
+										task_global_inventory_request: _au.task_global_inventory_request,
+										task_global_inventory_request_reject_info: _au.task_global_inventory_request_reject_info,
+										task_inventory_approval_info: _au.task_inventory_approval_info,
+										task_inventory_edit_info: _au.task_inventory_edit_info,
+										task_inventory_order_approval_info: _au.task_inventory_order_approval_info,
+										task_inventory_order_complete_info: _au.task_inventory_order_complete_info,
+										task_inventory_order_payment_info: _au.task_inventory_order_payment_info,
+										task_labour_approval_request: _au.task_labour_approval_request,
+										task_labour_approval_info: _au.task_labour_approval_info,
+										task_labour_edit_info: _au.task_labour_edit_info,
+										task_labour_bill_create_info: _au.task_labour_bill_create_info,
+										task_labour_bill_approval_request: _au.task_labour_bill_approval_request,
+										task_labour_bill_approval_info: _au.task_labour_bill_approval_info,
+										task_labour_bill_payment_info: _au.task_labour_bill_payment_info
+									}
+							};
+						}
+					});
+					if(!assigned){
+						unassigneduserlist[unassigneduserlist.length] = {
+							userId: _uu.userId,
+							name: _uu.name
+						}
+					}
+				});
+				res.json({ success: true, assigneduserlist: assigneduserlist, unassigneduserlist: unassigneduserlist});
+			});
+		});
+	} else res.json({success: false, operation: false, message: 'Session Expired. Please login again'});
+});
+//End - PROJECTS
 
 //All URL Patterns Routing
-app.get("/", function(req,res){
-	if(null != req.session.name){
-		res.redirect('/' + req.session.homeUrl);
+router.get("/", function(req,res){
+	if(null != req.session.userData && undefined != req.session.userData){
+		res.redirect('/' + req.session.userData.homeUrl);
 	} else {
 		res.redirect('/login');
 	}
 });
 
-app.get("/login", function(req,res){
+router.get("/login", function(req,res){
 	if(null != req.session || undefined != req.session)
 		req.session.destroy();
-	res.sendFile(path + "login.html");
+	res.render('login.html', {message: ''});
 });	
 
-app.get("/power", function(req,res){
-	if(req.session.name == undefined)
+router.get("/construction", function(req,res){
+	if(req.session.userData == undefined)
 		res.redirect('/login');
-	else res.sendFile(path + req.session.type + '-power.html');
+	else res.sendFile(path + req.session.userData.type + '-dashboard.html');
 });
 
-app.get("/water", function(req,res){
-	if(req.session.name == undefined)
+router.get("/user-admin", function(req,res){
+	if(req.session.userData == undefined)
 		res.redirect('/login');
-	else res.sendFile(path + req.session.type + '-water.html');
+	else res.render(path + req.session.userData.type + '-useradmin.html', {message: ''});
 });
 
-app.get("/cooling", function(req,res){
-	if(req.session.name == undefined)
+router.get("/project-management", function(req,res){
+	if(req.session.userData == undefined)
 		res.redirect('/login');
-	else res.sendFile(path + req.session.type + '-cooling.html');
+	else res.render(path + req.session.userData.type + '-projectadmin.html', {message: ''});
 });
 
-app.get("/zone", function(req,res){
-	if(req.session.name == undefined)
-		res.redirect('/login');
-	else res.sendFile(path + req.session.type + '-zone.html');
-});
-
-app.get("/dashboard", function(req,res){
-	if(req.session.name == undefined)
-		res.redirect('/login');
-	else res.sendFile(path + req.session.type + '-dashboard.html');
-});
-
-app.get("/utilities", function(req,res){
-	if(req.session.name == undefined)
-		res.redirect('/login');
-	else res.sendFile(path + req.session.type + '-utilities.html');
-});
-
-app.get("/profile", function(req,res){
-	if(req.session.name == undefined)
-		res.redirect('/login');
-	else res.sendFile(path + req.session.type + '-profile.html');
-});
-
-
-app.get("/retail", function(req,res){
-	if(req.session.name == undefined)
-		res.redirect('/login');
-	else res.sendFile(path + req.session.type + '-dashboard.html');
-});
-
-app.get("/logout", function(req,res){
+router.get("/logout", function(req,res){
 	res.redirect('/login');
 });
-
 
 http.listen(process.env.PORT || 3001, () => {				
 	logger.log('##################################################');

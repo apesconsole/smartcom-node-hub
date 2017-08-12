@@ -9,7 +9,7 @@
     <meta name="author" content="">
     <link rel="icon" href="/resources/bootstrap/favicon.ico">
 
-    <title>Inferstart</title>
+    <title>smartCom</title>
 
     <!-- Bootstrap core CSS -->
     <link href="/resources/bootstrap/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -25,10 +25,10 @@
     <link href="/resources/bootstrap/vendor/font-awesome/css/font-awesome.min.css" rel="stylesheet" type="text/css">
 	<style>
 		body {
-			background-color: white;
+			background-color: #f9f9f9;
 		}
 		.fonty {
-			color: #687888;
+			color: #5e5e5e;
 		}		
 		.icon {
 			width: 40px;
@@ -46,40 +46,42 @@
   <body>
     <div>
         <!-- Navigation -->
-        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0;  background-color: #687888;">
+        <nav class="navbar navbar-default navbar-static-top" role="navigation" style="margin-bottom: 0;  background-color: #5e5e5e;">
 			<div class="navbar-header">
 		
             </div>
 		</nav>
 	</div>
-    <div class="container">
-	   
+    <div class="container"  ng-app="loginApp" ng-controller="loginCtrl">
        <div class="row">
             <div class="col-md-4">
-                <div class="login-panel panel panel-info">
+                <div class="login-panel panel panel-info"  style="background-color: #f9f9f9;">
 					<div class="panel-body">
-						<strong style='font-size: 25px; color: #687888;'> Login</strong></strong>
+						<strong style='font-size: 25px; color: #5e5e5e;'> Login</strong></strong>
 					</div>				
                     <div class="panel-body">
-                        <form name="login" action="auth" method="post"> 
-                            <fieldset>
+						<span style="color: red;">{{message}}</span>
+                        <form name="login" action="authenticate" method="post"> 
+                            <fieldset style="border: 1px solid #f9f9f9;">
                                 <div class="form-group">
-                                    <input class="form-control" placeholder="User Id" name="userId" type="text" maxlength="12">
+                                    <input class="form-control" placeholder="User Id" name="userId" type="text" maxlength="20">
                                 </div>
                                 <div class="form-group">
-                                    <input class="form-control" placeholder="Password" name="password" type="password" value="" maxlength="8">
+                                    <input class="form-control" placeholder="Password" name="password" type="password" value="" maxlength="10">
                                 </div>
 								<a href="#" onclick="document.forms[0].submit()" class="btn btn-lg btn-success btn-block">Login</a>
                             </fieldset>
                         </form>
                     </div>
-					<h5><a class="navbar-brand text-muted small"><strong>&copy; Copyright 2017</strong></a></h5>
+					<!--<h5><a class="navbar-brand text-muted small"><strong>&copy; Copyright 2017</strong></a></h5>-->
                 </div>						
             </div>
 			<div class="col-md-5">
 				<div class="login-panel" style="margin-left: 10%;">
-					<font style='font-size: 80px; color: #687888; font-style: italic;'>smart</font><strong style='font-size: 90px; color: #687888; font-style: italic;'>Com</strong>
-					<font style='font-size: 12px; color: #687888; margin-left: 2%;'>Powered By</font> <font style='font-weight: bold;font-size: 12px; color: #687888; '>&reg; Inferstrat | Cloud Hub</font>
+				<!-- 
+					<font style='font-size: 80px; color: #5e5e5e; font-style: italic;'>smart</font><strong style='font-size: 90px; color: #5e5e5e; font-style: italic;'>Com</strong>
+					<font style='font-size: 12px; color: #5e5e5e; margin-left: 2%;'>Powered By</font> <font style='font-weight: bold;font-size: 12px; color: #5e5e5e; '>&reg; Inferstrat | Cloud Hub</font>
+				-->
 				</div>
             </div>
 
@@ -100,3 +102,9 @@
     <script src="/resources/bootstrap/dist/js/sb-admin-2.js"></script>
   </body>
 </html>
+<script>
+	var login = angular.module('loginApp', []);
+	login.controller('loginCtrl', function($scope, $http) {
+		$scope.message = '<%= message %>';	
+	});
+</script>
