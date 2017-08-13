@@ -517,7 +517,10 @@
 						  </tr>						  
 						</tbody>
 					</table>
-					<button class="btn btn-xs btn-success" type="button" ng-click="toggleEmailNotifications(userData)">
+					<button ng-if="userData.notification.active" class="btn btn-xs btn-success" type="button" ng-click="toggleEmailNotifications(userData)">
+						De-Activate
+					</button>
+					<button ng-if="!userData.notification.active" class="btn btn-xs btn-success" type="button" ng-click="toggleEmailNotifications(userData)">
 						Activate
 					</button>
 					<button class="btn btn-xs btn-default" type="button" ng-click="goToAssignedList(userData.siteId)">
