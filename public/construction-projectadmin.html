@@ -200,7 +200,7 @@
 				</div>
 				<!-- EDIT ACCESS -->
 				<div class="col-sm-8 fonty" ng-show="assignedList">
-					<h3>Assigned Users</h3>
+					<h3>Assigned Users to Project</h3>
 					<table class="table fonty">
 						<thead>
 						  <tr>
@@ -219,9 +219,15 @@
 							 </td>
 							 <td>
 								<button class="btn btn-xs btn-primary" type="button"  ng-click="goToSiteUserAccess(user)">
-									Access
+									Permissions
 								</button>
-								<button class="btn btn-xs btn-danger" type="button">
+								<button class="btn btn-xs btn-primary" type="button"  ng-click="goToSiteUserNotifications(user)">
+									Notifications
+								</button>		
+								<button ng-if="!evaluateAccess(user)" class="btn btn-xs btn-danger" type="button">
+									Un-Assign
+								</button>
+								<button ng-if="evaluateAccess(user)" disabled="true" class="btn btn-xs btn-danger" type="button">
 									Un-Assign
 								</button>									
 							 </td>
@@ -248,16 +254,19 @@
 								{{user.name}}
 							 </td>
 							 <td>
-								<button class="btn btn-xs btn-danger" type="button">
+								<button ng-if="!evaluateAccess(user)" class="btn btn-xs btn-warning" type="button">
 									Assign
-								</button>									
+								</button>
+								<button ng-if="evaluateAccess(user)" disabled="true" class="btn btn-xs btn-warning" type="button">
+									Assign
+								</button>								
 							 </td>
 						  </tr>
 						</tbody>
 					</table>					
 				</div>	
 				<div class="col-sm-8 fonty" ng-show="useraccess">
-					<h3>Access Details / {{accessDetails.name}}</h3>
+					<h3>Permissions granted to {{accessDetails.name}}</h3>
 					<table class="table fonty">
 						<thead>
 						  <tr>
@@ -332,10 +341,186 @@
 							 <td>
 								<input type="radio" name="pay" ng-value="false" ng-model="accessDetails.pay">
 							 </td>
-						  </tr>						  
+						  </tr>							  
 						</tbody>
 					</table>
 					<button class="btn btn-xs btn-default" type="button" ng-click="goToAssignedList(accessDetails.siteId)">
+						Back
+					</button>
+				</div>
+				
+				<div class="col-sm-8 fonty" ng-show="usernotifications">
+					<h3>Email Notification Set up for {{userData.name}}</h3>
+					<table class="table fonty" ng-show="userData.notification.active">
+						<thead>
+						  <tr>
+							<th>Activity</th>
+							<th>Yes</th>
+							<th>No</th>
+						  </tr>
+						</thead>
+						<tbody>
+						  <tr class="odd">
+							 <td>
+								When New Task is Added
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_add_info" ng-value="true"  ng-model="userData.notification.task_add_info">
+							 </td>						  
+							 <td>	
+								<input type="radio" name="task_add_info" ng-value="false" ng-model="userData.notification.task_add_info">
+							 </td>
+						  </tr>
+						  <tr class="even">
+							 <td>
+								When Task is Updated
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_edit_info" ng-value="true"  ng-model="userData.notification.task_edit_info">
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_edit_info" ng-value="false" ng-model="userData.notification.task_edit_info">
+							 </td>
+						  </tr>	
+						  <tr  class="odd">
+							 <td>
+								Requests for Invntory Approval
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_inventory_approval_info" ng-value="true"  ng-model="userData.notification.task_inventory_approval_info">
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_inventory_approval_info" ng-value="false" ng-model="userData.notification.task_inventory_approval_info">
+							 </td>
+						  </tr>	
+						  <tr class="even">
+							 <td>
+								When Inventory is  Updated
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_inventory_edit_info" ng-value="true"  ng-model="userData.notification.task_inventory_edit_info">
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_inventory_edit_info" ng-value="false" ng-model="userData.notification.task_inventory_edit_info">
+							 </td>
+						  </tr>
+						  <tr  class="odd">
+							 <td>
+								When Order is Approved
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_inventory_order_approval_info" ng-value="true"  ng-model="userData.notification.task_inventory_order_approval_info">
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_inventory_order_approval_info" ng-value="false" ng-model="userData.notification.task_inventory_order_approval_info">
+							 </td>
+						  </tr>
+						  <tr class="even">
+							 <td>
+								When Order is Completed
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_inventory_order_complete_info" ng-value="true"  ng-model="userData.notification.task_inventory_order_complete_info">
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_inventory_order_complete_info" ng-value="false" ng-model="userData.notification.task_inventory_order_complete_info">
+							 </td>
+						  </tr>	
+						  <tr  class="odd">
+							 <td>
+								When Order Payment is Made
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_inventory_order_payment_info" ng-value="true"  ng-model="userData.notification.task_inventory_order_payment_info">
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_inventory_order_payment_info" ng-value="false" ng-model="userData.notification.task_inventory_order_payment_info">
+							 </td>
+						  </tr>
+						  <tr class="even">
+							 <td>
+								Requests for Labour Approval
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_labour_approval_request" ng-value="true"  ng-model="userData.notification.task_labour_approval_request">
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_labour_approval_request" ng-value="false" ng-model="userData.notification.task_labour_approval_request">
+							 </td>
+						  </tr>
+						  <tr  class="odd">
+							 <td>
+								When Labour Approved
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_labour_approval_info" ng-value="true"  ng-model="userData.notification.task_labour_approval_info">
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_labour_approval_info" ng-value="false" ng-model="userData.notification.task_labour_approval_info">
+							 </td>
+						  </tr>	
+						  <tr class="even">
+							 <td>
+								When Labour is Updated
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_labour_edit_info" ng-value="true"  ng-model="userData.notification.task_labour_edit_info">
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_labour_edit_info" ng-value="false" ng-model="userData.notification.task_labour_edit_info">
+							 </td>
+						  </tr>	
+						  <tr  class="odd">
+							 <td>
+								When New Labour Bill is Created
+
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_labour_bill_create_info" ng-value="true"  ng-model="userData.notification.task_labour_bill_create_info">
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_labour_bill_create_info" ng-value="false" ng-model="userData.notification.task_labour_bill_create_info">
+							 </td>
+						  </tr>		
+						  <tr class="even">
+							 <td>
+								Requests for Labour Billing Approval
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_labour_bill_approval_request" ng-value="true"  ng-model="userData.notification.task_labour_bill_approval_request">
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_labour_bill_approval_request" ng-value="false" ng-model="userData.notification.task_labour_bill_approval_request">
+							 </td>
+						  </tr>
+						  <tr  class="odd">
+							 <td>
+								When Labour Bill is Approved
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_labour_bill_approval_info" ng-value="true"  ng-model="userData.notification.task_labour_bill_approval_info">
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_labour_bill_approval_info" ng-value="false" ng-model="userData.notification.task_labour_bill_approval_info">
+							 </td>
+						  </tr>	
+						  <tr class="even">
+							 <td>
+								When Labour Payment is Made
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_labour_bill_payment_info" ng-value="true"  ng-model="userData.notification.task_labour_bill_payment_info">
+							 </td>						  
+							 <td>
+								<input type="radio" name="task_labour_bill_payment_info" ng-value="false" ng-model="userData.notification.task_labour_bill_payment_info">
+							 </td>
+						  </tr>						  
+						</tbody>
+					</table>
+					<button class="btn btn-xs btn-success" type="button" ng-click="toggleEmailNotifications(userData)">
+						Activate
+					</button>
+					<button class="btn btn-xs btn-default" type="button" ng-click="goToAssignedList(userData.siteId)">
 						Back
 					</button>
 				</div>
@@ -361,6 +546,7 @@
 </html>
 <script>
 	var projectadmin = angular.module('projectadminApp', []);
+	var loggedInUser = {};
 	projectadmin.directive('leftmenu', function($compile) {
 		var directive = {};
 		directive.restrict = 'E';
@@ -379,6 +565,8 @@
 		$scope.assignedList = false;
 		$scope.unassignedList = false;
 		$scope.useraccess = false;
+		$scope.usernotifications = false;
+		$scope.userData = {};
 		$http.get("/getprojects")
 		.then(function(response) {
 			$scope.projects = response.data.projects;
@@ -402,6 +590,7 @@
 		$scope.assignedList = false;
 		$scope.unassignedList = false;
 		$scope.useraccess = false;
+		$scope.accessDetails = {};
 		$http.get("/getsites?projectId=" + project.projectId)
 		.then(function(response) {
 			$scope.sites = response.data.sites;
@@ -416,13 +605,18 @@
 			$scope.siteList = false;
 			$scope.editSite = true;
 			$scope.useraccess = false;
+			$scope.usernotifications = false;
 			$http.get("/getassignedusers?siteId=" + site.siteId)
 			.then(function(response) {
 				$scope.assignedList = true;
 				$scope.unassignedList = true;			
 				$scope.assigneduserlist = response.data.assigneduserlist;
 				$scope.unassigneduserlist = response.data.unassigneduserlist;
-			});			
+			});	
+		
+			$scope.evaluateAccess = function(user){
+				return (user.userId == loggedInUser.userId)
+			}			
 		}
 		$scope.goToSiteList = function(){
 			$scope.assigneduserlist = [];
@@ -434,9 +628,21 @@
 			$scope.assignedList = false;
 			$scope.unassignedList = false;
 			$scope.useraccess = true;
+			$scope.usernotifications = false;
+		}
+		$scope.goToSiteUserNotifications = function(userNotifications){
+			$scope.assignedList = false;
+			$scope.unassignedList = false;
+			$scope.useraccess = false;
+			$scope.usernotifications = true;
+			$scope.userData = userNotifications;
+		}
+		$scope.toggleEmailNotifications = function(userData){
+			$scope.userData.notification.active = !$scope.userData.notification.active;
 		}
 		$scope.goToAssignedList = function(siteId){
 			$scope.useraccess = false;
+			$scope.usernotifications = false;
 			$http.get("/getassignedusers?siteId=" + siteId)
 			.then(function(response) {
 				$scope.assignedList = true;
@@ -451,6 +657,7 @@
 		$http.get("/getuser")
 		.then(function(response) {
 			$scope.selectedTab = 'project-management';
+			loggedInUser = response.data.userData;
 			$scope.name = response.data.userData.name;
 			$scope.userMenu = response.data.userMenu;
 			$scope.message = '<%=message%>';

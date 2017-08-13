@@ -71,7 +71,104 @@
 				<div class="col-lg-12">
 					<h1 class="page-header fonty">Dashboard</h1>
 				</div>
-			</div>	
+				<div class="col-lg-12">
+					<div class="panel panel-default" ng-repeat="site in sites">
+						<div class="panel-heading fonty">
+							<strong>{{site.projectId}} / {{site.siteName}}</strong><br/>
+							<span>{{site.address}}</span><br/>
+							<span>Active Labour: {{site.taskMatrix.totalLabour}}</span>
+						</div>
+						<!-- /.panel-heading -->
+						<div class="panel-body fonty">
+							<div class="table-responsive col-lg-4">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Status</th>
+                                            <th class="text-right">Count</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr class="warning">
+                                            <td>Waiting</td>
+                                            <td class="text-right">{{site.taskMatrix.totalCompletedTasks}}</td>
+                                        </tr>
+                                        <tr class="info">
+                                            <td>Running</td>
+                                            <td class="text-right">{{site.taskMatrix.totalRunningTasks}}</td>
+                                        </tr>
+                                        <tr class="danger">
+                                            <td>On Hold</td>
+                                            <td class="text-right">{{site.taskMatrix.totalHeldTasks}}</td>
+                                        </tr>
+                                        <tr class="success">
+                                            <td>Completed</td>
+                                            <td class="text-right">{{site.taskMatrix.totalCompletedTasks}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+							<div class="table-responsive col-lg-4" ng-if="site.canViewFinance">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Cost</th>
+                                            <th class="text-right">{{site.taskMatrix.currency}}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="info">Total Estimated Cost</td>
+                                            <td class="text-right">{{site.taskMatrix.totalEstimatedCost}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="info">Inventory Cost</td>
+                                            <td class="text-right">{{site.taskMatrix.actualInventoryCost}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="info">Labour Cost</td>
+                                            <td class="text-right">{{site.taskMatrix.actualLabourCost}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="info">Total Cost</td>
+                                            <td class="danger text-right">{{site.taskMatrix.actualInventoryCost + site.taskMatrix.actualLabourCost}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+							<div class="table-responsive col-lg-4" ng-if="site.canViewFinance">
+                                <table class="table">
+                                    <thead>
+                                        <tr>
+                                            <th>Expense</th>
+                                            <th class="text-right">{{site.taskMatrix.currency}}</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="info">Total Payments</td>
+                                            <td class="text-right">{{site.taskMatrix.totalInventoryPayment + site.taskMatrix.totalLabourPayment}}</td>
+                                        </tr>
+                                        <tr ng-if="site.taskMatrix.deviation > 0">
+                                            <td class="info">Payments Pending</td>
+                                            <td class="text-right">{{(site.taskMatrix.actualInventoryCost + site.taskMatrix.actualLabourCost) - (site.taskMatrix.totalInventoryPayment + site.taskMatrix.totalLabourPayment)}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="info">Savings</td>
+                                            <td class="text-right">{{site.taskMatrix.savings}}</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="info">Deviation</td>
+                                            <td class="danger text-right">{{site.taskMatrix.deviation}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+						</div>
+						<!-- /.panel-body -->
+					</div>
+				</div>
+			</div>
 		</div>
 	</div>
 	<!-- Angular -->
@@ -100,12 +197,21 @@
 		};		
 		return directive;
 	});	
+	
+	var dashboardController = function($scope, $http){
+		$http.get("/loadconstructionsitematrix")
+		.then(function(response) {
+			$scope.sites = response.data.data;
+		});	
+	}
+	
 	home.controller('homeCtrl', function($scope, $http) {
 		$http.get("/getuser")
 		.then(function(response) {
 			$scope.selectedTab = '';
 			$scope.name = response.data.userData.name;
 			$scope.userMenu = response.data.userMenu;
+			dashboardController($scope, $http);
 		});	
 	});
 </script>

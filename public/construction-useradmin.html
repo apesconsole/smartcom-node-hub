@@ -98,7 +98,10 @@
 							<button class="btn btn-xs btn-primary" type="button" ng-click="goToEditUser(user)">
 								Edit
 							</button>
-							<button class="btn btn-xs btn-danger" type="button" ng-click="goToDeleteUser(user)">
+							<button  ng-if="!evaluateAccess(user)" class="btn btn-xs btn-danger" type="button" ng-click="goToDeleteUser(user)">
+								Delete
+							</button>
+							<button disabled="true" ng-if="evaluateAccess(user)" class="btn btn-xs btn-danger" type="button">
 								Delete
 							</button>							
 						</td>
@@ -224,9 +227,12 @@
 							</thead>
 							<tbody>
 							  <tr ng-repeat="permission in permissions" ng-class-odd="'odd'" ng-class-even="'even'">
-								 <td>
+								 <td ng-if="!evaluateAccess(user)">
 									<input type="checkbox" name="component[]" value="{{permission.component}}" ng-checked="permission.selected">
-								 </td>						  
+								 </td>	
+								 <td ng-if="evaluateAccess(user)">
+									<input disabled="true" type="checkbox" name="component[]" value="{{permission.component}}" ng-checked="permission.selected">
+								 </td>
 								 <td>
 									<span>
 										{{permission.title}}
@@ -242,12 +248,10 @@
 							</tbody>
 						</table>
 					</form>
-					<a href="#" onclick="document.forms[2].submit();" class="btn btn-xs btn-success">
+					<a ng-if="!evaluateAccess(user)" href="#" onclick="document.forms[2].submit();" class="btn btn-xs btn-success">
 						Save Roles
 					</a>
-					<button class="btn btn-xs btn-default" type="button" ng-click="goToUserList()">
-						Cancel
-					</button>						
+					<span ng-if="evaluateAccess(user)">* User cannot edit own Roles </span>
 				</div>
 			</div>				
 		</div>
@@ -269,6 +273,7 @@
 </html>
 <script>
 	var useradmin = angular.module('useradminApp', []);
+	var loggedInUser = {};
 	useradmin.directive('leftmenu', function($compile) {
 		var directive = {};
 		directive.restrict = 'E';
@@ -312,8 +317,8 @@
 		$scope.userList = false;
 		$scope.addUser = false;
 		$scope.editUser = true;
-		$scope.userPermissions = true;
 		$scope.user = user;
+		$scope.userPermissions = true;
 		$http.get("/getuserpermisiosns?userId=" + user.userId)
 			.then(function(response) {
 			$scope.permissions = response.data.permissions;
@@ -324,9 +329,13 @@
 		$http.get("/getuser")
 		.then(function(response) {
 			$scope.selectedTab = 'user-admin';
+			loggedInUser = response.data.userData;
 			$scope.name = response.data.userData.name;
 			$scope.userMenu = response.data.userMenu;
 			$scope.message = '<%=message%>';
+			$scope.evaluateAccess = function(user){
+				return (user.userId == loggedInUser.userId)
+			}
 			usersController($scope, $http);
 			$scope.goToUserList = function(){
 				$scope.permissions = [];
