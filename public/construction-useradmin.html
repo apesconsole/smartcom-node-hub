@@ -255,7 +255,7 @@
 					<a ng-if="!evaluateAccess(user)" href="#" onclick="document.forms[2].submit();" class="btn btn-xs btn-success">
 						Save Roles
 					</a>
-					<span ng-if="evaluateAccess(user)">* User cannot edit own Roles </span>
+					<span ng-show="evaluateAccess(user)">* User cannot edit own Roles </span>
 				</div>
 			</div>				
 		</div>

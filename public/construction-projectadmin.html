@@ -263,7 +263,8 @@
 							 </td>
 						  </tr>
 						</tbody>
-					</table>					
+					</table>
+					<span ng-show="evaluateAccess(user)">* User cannot edit own Assignments </span>					
 				</div>	
 				<div class="col-sm-8 fonty" ng-show="useraccess">
 					<h3>Permissions granted to {{accessDetails.name}}</h3>
