@@ -10,6 +10,7 @@ module.exports = connection.model('PERMISSIONS', new Schema({
     title: String,
     component: String,
     active: Boolean,
+    icon: String,
     app: Boolean,
     web: Boolean
 }),'PERMISSIONS');
