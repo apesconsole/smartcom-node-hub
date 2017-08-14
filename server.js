@@ -180,32 +180,6 @@ router.post("/edituser", function(req, res){
 	}
 });
 
-app.get("/getmonthlydata", function(req,res){
-	if(req.session.userId != undefined){
-		var url_parts = url.parse(req.url, true);
-		var queryParam = url_parts.query;
-	    loadProcessedData({},'FINALIZED_DATA_SET', { 
-				success: function(data){
-					logger.log(data.length);
-					res.json(data);
-				}, 
-				failure: function(){
-					res.json({});
-				}
-			}
-		);
-	} else res.json({});
-});
-
-//All URL Patterns Routing
-app.get("/", function(req,res){
-	if(null != req.session.name){
-		res.redirect('/' + req.session.homeUrl);
-	} else {
-		res.render('login.html', {message: 'Session Expired. Please Login Again.'});
-	}
-});
-
 router.get("/getuserpermisiosns", function(req,res){
 	if(req.session.userData != undefined){
 		let userId = req.body.userId || req.query.userId;
@@ -359,23 +333,23 @@ router.get("/getassignedusers", function(req,res){
 									receive: _au.receive,
 									pay: _au.pay,
 									notification: {
-										active: _au.active,
-										task_add_info: _au.task_add_info,
-										task_edit_info: _au.task_edit_info,
-										task_global_inventory_request: _au.task_global_inventory_request,
-										task_global_inventory_request_reject_info: _au.task_global_inventory_request_reject_info,
-										task_inventory_approval_info: _au.task_inventory_approval_info,
-										task_inventory_edit_info: _au.task_inventory_edit_info,
-										task_inventory_order_approval_info: _au.task_inventory_order_approval_info,
-										task_inventory_order_complete_info: _au.task_inventory_order_complete_info,
-										task_inventory_order_payment_info: _au.task_inventory_order_payment_info,
-										task_labour_approval_request: _au.task_labour_approval_request,
-										task_labour_approval_info: _au.task_labour_approval_info,
-										task_labour_edit_info: _au.task_labour_edit_info,
-										task_labour_bill_create_info: _au.task_labour_bill_create_info,
-										task_labour_bill_approval_request: _au.task_labour_bill_approval_request,
-										task_labour_bill_approval_info: _au.task_labour_bill_approval_info,
-										task_labour_bill_payment_info: _au.task_labour_bill_payment_info
+										active: _au.notification.active,
+										task_add_info: _au.notification.task_add_info,
+										task_edit_info: _au.notification.task_edit_info,
+										task_global_inventory_request: _au.notification.task_global_inventory_request,
+										task_global_inventory_request_reject_info: _au.notification.task_global_inventory_request_reject_info,
+										task_inventory_approval_info: _au.notification.task_inventory_approval_info,
+										task_inventory_edit_info: _au.notification.task_inventory_edit_info,
+										task_inventory_order_approval_info: _au.notification.task_inventory_order_approval_info,
+										task_inventory_order_complete_info: _au.notification.task_inventory_order_complete_info,
+										task_inventory_order_payment_info: _au.notification.task_inventory_order_payment_info,
+										task_labour_approval_request: _au.notification.task_labour_approval_request,
+										task_labour_approval_info: _au.notification.task_labour_approval_info,
+										task_labour_edit_info: _au.notification.task_labour_edit_info,
+										task_labour_bill_create_info: _au.notification.task_labour_bill_create_info,
+										task_labour_bill_approval_request: _au.notification.task_labour_bill_approval_request,
+										task_labour_bill_approval_info: _au.notification.task_labour_bill_approval_info,
+										task_labour_bill_payment_info: _au.notification.task_labour_bill_payment_info
 									}
 							};
 						}
@@ -392,6 +366,119 @@ router.get("/getassignedusers", function(req,res){
 		});
 	} else res.json({success: false, operation: false, message: 'Session Expired. Please login again'});
 });
+
+router.post('/assignusertosite', function(req, res) {
+	if(req.session.userData != undefined){
+		let siteId = req.body.siteId;
+		let userId = req.body.userId;
+		let newSiteUserMap = new cnstrntSiteUserMap({
+				userId: userId,
+				siteId: siteId,
+				edit: false,
+				viewFinance: false,
+				export: false,
+				approve: false,
+				createOrder: false,
+				createBill: false,
+				receive: false,
+				pay: false,
+				notification: {
+					active: false,
+					task_add_info: false,
+					task_edit_info: false,
+					task_global_inventory_request: false,
+					task_global_inventory_request_reject_info: false,
+					task_inventory_approval_info: false,
+					task_inventory_edit_info: false,
+					task_inventory_order_approval_info: false,
+					task_inventory_order_complete_info: false,
+					task_inventory_order_payment_info: false,
+					task_labour_approval_request: false,
+					task_labour_approval_info: false,
+					task_labour_edit_info: false,
+					task_labour_bill_create_info: false,
+					task_labour_bill_approval_request: false,
+					task_labour_bill_approval_info: false,
+					task_labour_bill_payment_info: false
+				}
+		});
+		newSiteUserMap.save(function(err){
+			res.json({ success: true, operation: true});
+		});
+	} else res.json({success: false, operation: false, message: 'Session Expired. Please login again'});
+});
+
+router.post('/unassignusertosite', function(req, res) {
+	if(req.session.userData != undefined){
+		let siteId = req.body.siteId;
+		let userId = req.body.userId;
+		cnstrntSiteUserMap.remove({siteId: siteId, userId: userId}, function(err) {
+				res.json({ success: true, operation: true});
+		});
+	} else res.json({success: false, operation: false, message: 'Session Expired. Please login again'});
+});
+
+router.post('/savepermissions', function(req, res) {
+	if(req.session.userData != undefined){
+		let siteId = req.body.siteId;
+		let userId = req.body.userId;
+		cnstrntSiteUserMap.findOne({siteId: siteId, userId: userId}, function(err, userPermission) {
+			//userPermission.edit = req.body.edit || req.query.edit;
+			userPermission.viewFinance = req.body.viewFinance;
+			//userPermission.export = req.body.export || req.query.export;
+			userPermission.approve = req.body.approve;
+			userPermission.createOrder = req.body.createOrder;
+			userPermission.createBill = req.body.createBill;
+			userPermission.receive = req.body.receive;
+			userPermission.pay = req.body.pay;
+			userPermission.save(function(err){
+				res.json({ success: true, operation: true});
+			});
+		});
+	} else res.json({success: false, operation: false, message: 'Session Expired. Please login again'});
+});
+
+router.post('/activatedeactivatenotofications', function(req, res) {
+	if(req.session.userData != undefined){
+		let siteId = req.body.siteId;
+		let userId = req.body.userId;
+		cnstrntSiteUserMap.findOne({siteId: siteId, userId: userId}, function(err, userNotification) {
+			userNotification.notification.active = req.body.active;
+			userNotification.save(function(err){
+				res.json({ success: true, operation: true});
+			});
+		});
+	} else res.json({success: false, operation: false, message: 'Session Expired. Please login again'});
+});
+
+router.post('/savenotofications', function(req, res) {
+	if(req.session.userData != undefined){
+		let siteId = req.body.siteId;
+		let userId = req.body.userId;
+		cnstrntSiteUserMap.findOne({siteId: siteId, userId: userId}, function(err, userNotification) {
+			userNotification.notification.task_add_info = req.body.task_add_info;
+			userNotification.notification.task_edit_info = req.body.task_edit_info;
+			userNotification.notification.task_global_inventory_request = req.body.task_global_inventory_request;
+			userNotification.notification.task_global_inventory_request_reject_info = req.body.task_global_inventory_request_reject_info;
+			userNotification.notification.task_inventory_approval_info = req.body.task_inventory_approval_info;
+			userNotification.notification.task_inventory_edit_info = req.body.task_inventory_edit_info;
+			userNotification.notification.task_inventory_order_approval_info = req.body.task_inventory_order_approval_info;
+			userNotification.notification.task_inventory_order_complete_info = req.body.task_inventory_order_complete_info;
+			userNotification.notification.task_inventory_order_payment_info = req.body.task_inventory_order_payment_info;
+			userNotification.notification.task_labour_approval_request = req.body.task_labour_approval_request;
+			userNotification.notification.task_labour_approval_info = req.body.task_labour_approval_info;
+			userNotification.notification.task_labour_edit_info = req.body.task_labour_edit_info;
+			userNotification.notification.task_labour_bill_create_info = req.body.task_labour_bill_create_info;
+			userNotification.notification.task_labour_bill_approval_request = req.body.task_labour_bill_approval_request;
+			userNotification.notification.task_labour_bill_approval_info = req.body.task_labour_bill_approval_info;
+			userNotification.notification.task_labour_bill_payment_info = req.body.task_labour_bill_payment_info;
+			userNotification.save(function(err){
+				res.json({ success: true, operation: true});
+			});
+		});
+	} else res.json({success: false, operation: false, message: 'Session Expired. Please login again'});
+});
+
 //End - PROJECTS
 
 //Start - TASKS
@@ -492,11 +579,11 @@ router.get('/loadconstructionsitematrix', function(req, res) {
 //End - TASKS
 
 //All URL Patterns Routing
-router.get("/", function(req,res){
-	if(null != req.session.userData && undefined != req.session.userData){
+app.get("/", function(req,res){
+	if(null != req.session.userData){
 		res.redirect('/' + req.session.userData.homeUrl);
 	} else {
-		res.redirect('/login');
+		res.render('login.html', {message: 'Session Expired. Please Login Again.'});
 	}
 });
 
@@ -537,20 +624,6 @@ router.get("/site-inventory-config", function(req,res){
 });
 
 router.get("/logout", function(req,res){
-	res.redirect('/login');
-});
-
-app.get("/transport", function(req,res){
-	if(req.session.name == undefined)
-		res.redirect('/login');
-	else res.sendFile(path + req.session.type + '-dashboard.html');
-});
-
-
-app.get("/process", function(req,res){
-	//aggregateTypeData();
-	//aggregateMonthData();
-	//aggregateMaxPerMonthData();
 	res.redirect('/login');
 });
 

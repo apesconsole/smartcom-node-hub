@@ -224,7 +224,7 @@
 								<button class="btn btn-xs btn-primary" type="button"  ng-click="goToSiteUserNotifications(user)">
 									Notifications
 								</button>		
-								<button ng-if="!evaluateAccess(user)" class="btn btn-xs btn-danger" type="button">
+								<button ng-if="!evaluateAccess(user)" class="btn btn-xs btn-danger" type="button" ng-click="unassignSiteToUser(user)">
 									Un-Assign
 								</button>
 								<button ng-if="evaluateAccess(user)" disabled="true" class="btn btn-xs btn-danger" type="button">
@@ -254,10 +254,10 @@
 								{{user.name}}
 							 </td>
 							 <td>
-								<button ng-if="!evaluateAccess(user)" class="btn btn-xs btn-warning" type="button">
+								<button ng-if="!evaluateAccess(user)" class="btn btn-xs btn-warning" type="button" ng-click="assignSiteToUser(user)">
 									Assign
 								</button>
-								<button ng-if="evaluateAccess(user)" disabled="true" class="btn btn-xs btn-warning" type="button">
+								<button ng-if="evaluateAccess(user)" disabled="true" class="btn btn-xs btn-warning" type="button" ">
 									Assign
 								</button>								
 							 </td>
@@ -345,6 +345,12 @@
 						  </tr>							  
 						</tbody>
 					</table>
+					<button ng-if="evaluateAccess(accessDetails)" disabled="true" class="btn btn-xs btn-success" type="button">
+						Save
+					</button>
+					<button ng-if="!evaluateAccess(accessDetails)" class="btn btn-xs btn-success" type="button" ng-click="savePermissions(accessDetails)">
+						Save
+					</button>
 					<button class="btn btn-xs btn-default" type="button" ng-click="goToAssignedList(accessDetails.siteId)">
 						Back
 					</button>
@@ -518,11 +524,20 @@
 						  </tr>						  
 						</tbody>
 					</table>
-					<button ng-if="userData.notification.active" class="btn btn-xs btn-success" type="button" ng-click="toggleEmailNotifications(userData)">
+					<button ng-if="evaluateAccess(userData) && userData.notification.active" disabled="true" class="btn btn-xs btn-success" type="button">
 						De-Activate
 					</button>
+					<button ng-if="!evaluateAccess(userData) && userData.notification.active" class="btn btn-xs btn-success" type="button" ng-click="toggleEmailNotifications(userData)">
+						De-Activate
+					</button>					
 					<button ng-if="!userData.notification.active" class="btn btn-xs btn-success" type="button" ng-click="toggleEmailNotifications(userData)">
 						Activate
+					</button>
+					<button ng-if="evaluateAccess(userData) && userData.notification.active" disabled="true" class="btn btn-xs btn-success" type="button">
+						Save
+					</button>
+					<button ng-if="!evaluateAccess(userData) && userData.notification.active" class="btn btn-xs btn-success" type="button" ng-click="saveNotification(userData)">
+						Save
 					</button>
 					<button class="btn btn-xs btn-default" type="button" ng-click="goToAssignedList(userData.siteId)">
 						Back
@@ -570,7 +585,6 @@
 		$scope.unassignedList = false;
 		$scope.useraccess = false;
 		$scope.usernotifications = false;
-		$scope.userData = {};
 		$http.get("/getprojects")
 		.then(function(response) {
 			$scope.projects = response.data.projects;
@@ -595,6 +609,7 @@
 		$scope.unassignedList = false;
 		$scope.useraccess = false;
 		$scope.accessDetails = {};
+		$scope.userData = {};
 		$http.get("/getsites?projectId=" + project.projectId)
 		.then(function(response) {
 			$scope.sites = response.data.sites;
@@ -617,7 +632,69 @@
 				$scope.assigneduserlist = response.data.assigneduserlist;
 				$scope.unassigneduserlist = response.data.unassigneduserlist;
 			});	
-		
+			$scope.unassignSiteToUser = function(unassingnUser){
+				var data = {
+					siteId: $scope.site.siteId,
+					userId: unassingnUser.userId
+				};
+				$http.post("/unassignusertosite", data, {})
+				.then(function(response) {
+					$scope.goToEditSite($scope.site);
+				});	
+			}
+			$scope.assignSiteToUser = function(assingnUser){
+				var data = {
+					siteId: $scope.site.siteId,
+					userId: assingnUser.userId
+				};
+				$http.post("/assignusertosite", data, {})
+				.then(function(response) {
+					$scope.goToEditSite($scope.site);
+				});	
+			}
+			$scope.savePermissions = function(userPermissions){
+				var data = {
+					siteId: $scope.site.siteId,
+					userId: userPermissions.userId,
+					viewFinance: userPermissions.viewFinance,
+					approve: userPermissions.approve,
+					createOrder: userPermissions.createOrder,
+					createBill: userPermissions.createBill,
+					receive: userPermissions.receive,
+					pay: userPermissions.pay
+				};
+				$http.post("/savepermissions", data, {})
+				.then(function(response) {
+					$scope.goToEditSite($scope.site);
+				});	
+			}
+			$scope.saveNotification = function(userNotifications){
+				var data = {
+					siteId: $scope.site.siteId,
+					userId: userNotifications.userId,
+					task_add_info: userNotifications.notification.task_add_info,
+					task_edit_info: userNotifications.notification.task_edit_info,
+					task_global_inventory_request: userNotifications.notification.task_add_info,
+					task_global_inventory_request_reject_info: userNotifications.notification.task_global_inventory_request_reject_info,
+					task_inventory_approval_info: userNotifications.notification.task_inventory_approval_info,
+					task_inventory_edit_info: userNotifications.notification.task_inventory_edit_info,
+					task_inventory_order_approval_info: userNotifications.notification.task_inventory_order_approval_info,
+					task_inventory_order_complete_info: userNotifications.notification.task_inventory_order_complete_info,
+					task_inventory_order_payment_info: userNotifications.notification.task_inventory_order_payment_info,
+					task_labour_approval_request: userNotifications.notification.task_labour_approval_request,
+					task_labour_approval_info: userNotifications.notification.task_labour_approval_info,
+					task_labour_edit_info: userNotifications.notification.task_labour_edit_info,
+					task_labour_bill_create_info: userNotifications.notification.task_labour_bill_create_info,
+					task_labour_bill_approval_request: userNotifications.notification.task_labour_bill_approval_request,
+					task_labour_bill_approval_info: userNotifications.notification.task_labour_bill_approval_info,
+					task_labour_bill_payment_info: userNotifications.notification.task_labour_bill_payment_info
+				};
+				$http.post("/savenotofications", data, {})
+				.then(function(response) {
+					$scope.goToEditSite($scope.site);
+				});
+			}
+
 			$scope.evaluateAccess = function(user){
 				return (user.userId == loggedInUser.userId)
 			}			
@@ -634,15 +711,25 @@
 			$scope.useraccess = true;
 			$scope.usernotifications = false;
 		}
-		$scope.goToSiteUserNotifications = function(userNotifications){
+		$scope.goToSiteUserNotifications = function(userData){
+			$scope.userData = userData;
 			$scope.assignedList = false;
 			$scope.unassignedList = false;
 			$scope.useraccess = false;
 			$scope.usernotifications = true;
-			$scope.userData = userNotifications;
+			console.log(userData);
 		}
 		$scope.toggleEmailNotifications = function(userData){
-			$scope.userData.notification.active = !$scope.userData.notification.active;
+			//$scope.userData.notification.active = !$scope.userData.notification.active;
+			var data = {
+				siteId: $scope.site.siteId,
+				userId: userData.userId,
+				active: !$scope.userData.notification.active
+			};
+			$http.post("/activatedeactivatenotofications", data, {})
+			.then(function(response) {
+				$scope.goToEditSite($scope.site);
+			});
 		}
 		$scope.goToAssignedList = function(siteId){
 			$scope.useraccess = false;
